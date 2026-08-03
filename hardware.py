@@ -13,6 +13,11 @@ class Device:
     ClawDiffyRight = 7
     ClawDiffyLeft = 8
     Gripper = 9
+    
+    # LED Devices
+    LedReady = 10    # Pin 26
+    LedStartup = 11  # Pin 27
+    LedBT = 12       # Pin 28
 
 
 class Arduino:
@@ -21,19 +26,15 @@ class Arduino:
     connected = False
 
     @staticmethod
-    def connect_arduino(port='COM12'):
-        """Connects to the specified serial port (e.g. 'COM12' or '/dev/ttyACM0')."""
+    def connect_arduino(port='/dev/ttyACM0'):
+        """Connects to the specified serial port (e.g. '/dev/ttyACM0' or 'COM12')."""
         Arduino.connected = False
         
-        # Build candidate ports list, starting with the requested port
         ports_to_try = [port]
-        
-        # Auto-detect other active system ports as fallback
         system_ports = [p.device for p in serial.tools.list_ports.comports()]
         ports_to_try.extend(system_ports)
         ports_to_try.extend(['/dev/ttyACM0', 'COM12'])
 
-        # Remove duplicate entries while maintaining priority order
         seen = set()
         deduped_ports = [p for p in ports_to_try if not (p in seen or seen.add(p))]
 
@@ -53,7 +54,6 @@ class Arduino:
     @staticmethod
     def send_command(command, read=False, override=False):
         if not Arduino.connected and not override:
-            print("Arduino not connected")
             return
         
         encoded_command = (command + "\n").encode('utf-8')
@@ -64,8 +64,17 @@ class Arduino:
             return raw_data.decode('utf-8').strip()
 
     @staticmethod
+    def set_led(device_id, state):
+        """State: 0 = Off, 1 = On, 2 = Blink (for startup LED)"""
+        Arduino.send_command(f"{device_id},{state}")
+
+    @staticmethod
     def close():
         if Arduino.serial and Arduino.serial.is_open:
+            # Turn off status LEDs on close
+            Arduino.set_led(Device.LedReady, 0)
+            Arduino.set_led(Device.LedStartup, 0)
+            Arduino.set_led(Device.LedBT, 0)
             Arduino.serial.close()
         Arduino.connected = False
 
@@ -90,7 +99,3 @@ class Motor:
     def stop(self):
         cmd = f'{self.id},0'
         Arduino.send_command(cmd)
-
-
-class Stepper:
-    pass
