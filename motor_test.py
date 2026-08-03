@@ -1,32 +1,25 @@
 import time
 from hardware import *
+from drivetrain import Drivetrain
 time.sleep(1)
 Arduino.connect_arduino()
 time.sleep(1)
-front_left = Motor(Device.FrontLeftDrive)
-front_right = Motor(Device.FrontRightDrive)
-back_left = Motor(Device.BackLeftDrive)
-back_right = Motor(Device.BackRightDrive)
+Drivetrain.initiate()
 
 time.sleep(1)
-front_left.run(0.5)
-time.sleep(0.5)
-front_left.stop()
+Drivetrain.run(0,1,0)
+time.sleep(1)
+Drivetrain.stop()
 
 time.sleep(1)
-front_right.run(0.5)
-time.sleep(0.5)
-front_right.stop()
+Drivetrain.run(1,0,0)
+time.sleep(1)
+Drivetrain.stop()
 
 time.sleep(1)
-back_right.run(0.5)
-time.sleep(0.5)
-back_right.stop()
-
+Drivetrain.run(0,0,1)
 time.sleep(1)
-back_left.run(0.5)
-time.sleep(0.5)
-back_left.stop()
+Drivetrain.stop()
 
 Arduino.stop()
 time.sleep(0.5)
