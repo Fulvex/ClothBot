@@ -42,6 +42,14 @@ def index():
 def handle_connect():
     print("Client connected to dashboard!")
 
+@socketio.on("disconnect")
+def handle_disconnect():
+    print("Client disconnected!")
+    Controller.zero_joysticks()
+    Robot.stop()
+    Robot.controller_mode = ControllerState.DIRECT
+
+
 
 @socketio.on("robot_command")
 def handle_robot_command(data):

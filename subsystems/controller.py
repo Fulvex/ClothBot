@@ -56,3 +56,8 @@ class Controller:
         Controller.left_stick_x = Controller.apply_deadzone(controller.get_axis(Controller.AXIS_LEFT_STICK_X))
         Controller.left_stick_y = -Controller.apply_deadzone(controller.get_axis(Controller.AXIS_LEFT_STICK_Y))
         Controller.right_stick_x = Controller.apply_deadzone(controller.get_axis(Controller.AXIS_RIGHT_STICK_X))
+    @staticmethod
+    def zero_joysticks():
+        Controller.left_stick_x = 0.0
+        Controller.left_stick_y = 0.0
+        Controller.right_stick_x = 0.0

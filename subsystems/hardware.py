@@ -51,7 +51,6 @@ class Arduino:
                     print("❌ Could not connect to Arduino on any port.")
     @staticmethod
     def ping():
-        print("Pinging...")
         Arduino.send_command(f'{Device.Ping},0')
     @staticmethod
     def send_command(command, read=False, override=False):
