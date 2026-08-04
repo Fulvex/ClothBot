@@ -55,7 +55,12 @@ class Camera:
                 print("Camera not connected")
     @staticmethod
     def socket_thread(socket : SocketIO):
-        at_detector = Detector(families="tag36h11")
+        at_detector = Detector(families="tag36h11",
+            nthreads=4,
+            quad_decimate=1.0,
+            quad_sigma=0.0,
+            refine_edges=True,
+        )
         while (Camera.connected and Camera.pipeline is not None and Camera.align is not None):
             elapsed = time.perf_counter() - Camera.start_time
             if (elapsed < Camera.FRAME_DELAY):
@@ -75,7 +80,9 @@ class Camera:
 
                     # 2. Convert to grayscale for AprilTag detection
                     gray = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
+                    cv2.imshow("gray", gray)
                     tags = at_detector.detect(gray)
+                    print("Detected:", len(tags))
 
                     # 3. Loop through detected tags and draw hitboxes/IDs
                     for tag in tags:

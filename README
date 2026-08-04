@@ -42,3 +42,6 @@ sudo systemctl daemon-reload
 To read:
 sudo systemctl status clothbot
 journalctl -u clothbot -f
+
+kill:
+pkill -f "app"
