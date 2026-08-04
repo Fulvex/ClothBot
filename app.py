@@ -19,7 +19,6 @@ def get_telemetry():
     }
 
 def background_thread():
-    """Background task to continuously process RealSense frames and push updates."""
     start_time = time.perf_counter()
     while True:
         try:
@@ -76,7 +75,7 @@ def handle_robot_command(data):
     elif command == "CONNECT":
         Robot.initiate()
     elif command == "STOP":
-        Controller.left_stick_x,Controller.right_stick_x,Controller.left_stick_y = 0.0,0.0,0.0
+        Controller.zero_joysticks()
         Arduino.stop()
     elif command == "GAMEPAD":
         if (not isinstance(val,str)):
@@ -86,7 +85,6 @@ def handle_robot_command(data):
         x,_,val = val.partition(",")
         y,_,r = val.partition(",")
         x,y,r = float(x),float(y),float(r)
-        print(x,y,r)
         Controller.left_stick_x,Controller.left_stick_y,Controller.right_stick_x = x,y,r
 
 if __name__ == "__main__":

@@ -43,11 +43,13 @@ class Camera:
             if (Camera.connected):
                 Camera.thread = threading.Thread(target=Camera.read)
                 Camera.thread.start()
+                Camera.start_time = time.perf_counter()
             else:
                 print("Camera not connected")
     @staticmethod
     def read():
         if (not Camera.connected or Camera.pipeline == None or Camera.align == None):
+            Camera.connected = False
             return
         elapsed = time.perf_counter() - Camera.start_time
 
@@ -76,4 +78,5 @@ class Camera:
     def stop():
         if (not Camera.connected):
             return
+        Camera.thread.join()
         Camera.pipeline.stop()
