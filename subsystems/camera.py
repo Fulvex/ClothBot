@@ -49,16 +49,18 @@ class Camera:
             else:
                 print("Camera not connected")
     @staticmethod
-    def read():
-        if (not Camera.connected or Camera.pipeline == None or Camera.align == None):
-            Camera.connected = False
-            return
-        elapsed = time.perf_counter() - Camera.start_time
+    def run_thread():
+        while (Camera.connected and Camera.pipeline is not None and Camera.align is not None):
+            elapsed = time.perf_counter() - Camera.start_time
+            if (elapsed < Camera.FRAME_DELAY):
+                time.sleep(Camera.FRAME_DELAY - elapsed)
+            Camera.start_time = time.perf_counter()
+            print("Capturing Camera")
+            Camera.read()
+        Camera.connected = False
 
-        if (elapsed < Camera.FRAME_DELAY):
-            time.sleep(Camera.FRAME_DELAY - elapsed)
-        Camera.start_time = time.perf_counter()
-        print("Capturing Camera")
+    @staticmethod
+    def read():
         try:
             frames = Camera.pipeline.wait_for_frames()
             aligned_frames = Camera.align.process(frames)
