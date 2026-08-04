@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "Loading"
-sleep 5
+sleep 30
 echo "Executing"
 /home/fulvex/ClothBot/venv/bin/python3 -u -m app
 
