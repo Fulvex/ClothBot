@@ -41,6 +41,8 @@ class Camera:
             Camera.align = rs.align(rs.stream.color)
             Camera.connected = True
             print("Camera connected! (if I was gemini I would put an emoji here)")
+        except:
+            print("Failed to connect camera")
         finally:
             time.sleep(0.5)
             if (Camera.connected):
