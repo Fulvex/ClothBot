@@ -17,6 +17,7 @@ flask run
 setting up startup script:
 sudo nano /etc/systemd/system/clothbot.service
 
+  GNU nano 7.2          /etc/systemd/system/clothbot.service
 [Unit]
 Description=ClothBot Server
 After=NetworkManager.service network-online.target
@@ -25,6 +26,13 @@ Wants=network-online.target
 [Service]
 User=fulvex
 WorkingDirectory=/home/fulvex/ClothBot
+Environment=SDL_AUDIODRIVER=dummy
+
+# 1. Systemd will automatically create /run/clothbot and grant ownership to 'Cl>
+RuntimeDirectory=clothbot
+
+# 2. Force the environment variable to point to that newly created directory
+Environment=XDG_RUNTIME_DIR=/run/clothbot
 
 ExecStart=/bin/bash /home/fulvex/ClothBot/execute.sh
 
@@ -33,6 +41,7 @@ RestartSec=5
 
 [Install]
 WantedBy=multi-user.target
+
 
 To read:
 sudo systemctl status clothbot

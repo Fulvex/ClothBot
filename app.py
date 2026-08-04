@@ -92,7 +92,7 @@ if __name__ == "__main__":
         time.sleep(1)
         Robot.initiate(socketio)
         socketio.start_background_task(background_thread)
-        socketio.run(app, host="0.0.0.0", port=5000, debug=False)
+        socketio.run(app, host="0.0.0.0", port=5000, debug=False,allow_unsafe_werkzeug=True)
     except KeyboardInterrupt:
         print("User interupting")
     finally:
