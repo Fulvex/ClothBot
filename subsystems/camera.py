@@ -23,6 +23,20 @@ class Camera:
 
     thread : threading.Thread
 
+    TURN_P = 0.01
+    DRIVE_P = 0.01
+
+    MAX_TURN = 1
+    MAX_DRIVE = 1
+
+    turn = 0.3
+    drive = 0.3
+
+    WIDTH = 640
+    HEIGHT = 480
+
+    tag_enabled = False
+
     @staticmethod
     def initiate(socket : SocketIO):
         Camera.connected = False
@@ -33,7 +47,7 @@ class Camera:
             config = rs.config()
 
             # Enable Color and Depth streams at 640x480, 30 FPS
-            config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, Camera.FRAME_RATE_HZ)
+            config.enable_stream(rs.stream.color, Camera.WIDTH, Camera.HEIGHT, rs.format.bgr8, Camera.FRAME_RATE_HZ)
             #config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
 
             Camera.pipeline.start(config)
@@ -72,26 +86,33 @@ class Camera:
                 if color_frame:
                     # 1. Process RGB Frame into a NumPy array
                     color_image = np.asanyarray(color_frame.get_data())
+                    if (Camera.tag_enabled):
+                        # 2. Convert to grayscale for AprilTag detection
+                        gray = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
+                        tags = at_detector.detect(gray)
 
-                    # 2. Convert to grayscale for AprilTag detection
-                    gray = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
-                    tags = at_detector.detect(gray)
+                        # 3. Loop through detected tags and draw hitboxes/IDs
+                        for tag in tags:
+                            pts = [(int(corner[0]), int(corner[1])) for corner in tag.corners]
 
-                    # 3. Loop through detected tags and draw hitboxes/IDs
-                    for tag in tags:
-                        pts = [(int(corner[0]), int(corner[1])) for corner in tag.corners]
+                            # Draw the 4 lines of the hitbox (Green)
+                            for i in range(4):
+                                cv2.line(color_image, pts[i], pts[(i + 1) % 4], (0, 255, 0), 3)
 
-                        # Draw the 4 lines of the hitbox (Green)
-                        for i in range(4):
-                            cv2.line(color_image, pts[i], pts[(i + 1) % 4], (0, 255, 0), 3)
+                            # Draw center point (Red)
+                            center = (int(tag.center[0]), int(tag.center[1]))
+                            cv2.circle(color_image, center, 4, (0, 0, 255), -1)
 
-                        # Draw center point (Red)
-                        center = (int(tag.center[0]), int(tag.center[1]))
-                        cv2.circle(color_image, center, 4, (0, 0, 255), -1)
+                            # Put the Tag ID label above the box (Blue text)
+                            cv2.putText(color_image, f"ID: {tag.tag_id}", (pts[0][0], pts[0][1] - 10),
+                                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
 
-                        # Put the Tag ID label above the box (Blue text)
-                        cv2.putText(color_image, f"ID: {tag.tag_id}", (pts[0][0], pts[0][1] - 10),
-                                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
+                            Camera.turn = Camera.TURN_P * (center[0] - Camera.WIDTH // 2)
+                            Camera.drive = 0 #TBA with distance
+
+                            # Clamp turn and drive values
+                            Camera.turn = max(-Camera.MAX_TURN, min(Camera.turn, Camera.MAX_TURN))
+                            Camera.drive = max(-Camera.MAX_DRIVE, min(Camera.drive, Camera.MAX_DRIVE))
 
                     # 4. Encode the annotated frame to JPEG and base64
                     _, buffer_color = cv2.imencode(".jpg", color_image, [cv2.IMWRITE_JPEG_QUALITY, 80])

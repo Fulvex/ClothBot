@@ -72,4 +72,7 @@ class Robot:
             Controller.run()
             if (not Controller.connected):
                 x,y,r = 0,0,0
+        if (Robot.state == RobotState.AUTO):
+            Camera.tag_enabled = True
+            r = Camera.turn
         Drivetrain.run(x,y,r)

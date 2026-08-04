@@ -62,6 +62,10 @@ def handle_robot_command(data):
     if command == "STATE":
         if (isinstance(val,str)):
             Robot.state = val
+        if (val == RobotState.AUTO):
+            Camera.tag_enabled = True
+        else:
+            Camera.tag_enabled = False
     elif command == "DIRECT_CONTROL":
         Robot.controller_mode = ControllerState.DIRECT
         Robot.state = RobotState.TELEOP
