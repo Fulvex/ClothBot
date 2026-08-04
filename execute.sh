@@ -6,6 +6,6 @@ echo "Executing"
 
 cd ~/ClothBot
 
-/venv/bin/python -u -m app.py
+/home/fulvex/venv/bin/python -u -m app.py
 
 echo "Done Executing"
