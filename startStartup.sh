@@ -1,4 +1,4 @@
 #!/bin/bash
 
-sudo systemctl enable ClothBot
-sudo systemctl start ClothBot
+sudo systemctl enable clothbot
+sudo systemctl start clothbot
