@@ -64,7 +64,6 @@ class Camera:
                 #depth_frame = aligned_frames.get_depth_frame()
                 #depth_profile = depth_frame.get_profile().as_video_stream_profile()
                 #intrinsics = depth_profile.get_intrinsics()
-                print("recieved color frame")
                 if color_frame:
                     # 1. Process RGB Frame
                     color_image = np.asanyarray(color_frame.get_data())
