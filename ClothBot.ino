@@ -6,6 +6,8 @@ struct Motor {
   int pwmPort;
 };
 
+long startTime = millis();
+
 void motorCommand(Motor motor, int value) {
   // Turn off
   if (value == 0) {
@@ -42,6 +44,7 @@ Motor backLeftMotor = {BACK_LEFT_DRIVER_PORT, BACK_LEFT_PWM_PORT};
 Motor backRightMotor = {BACK_RIGHT_DRIVER_PORT, BACK_RIGHT_PWM_PORT};
 
 void setup() {
+  startTime = millis();
   Serial.begin(115200);
 
   pinMode(FRONT_LEFT_DRIVER_PORT, OUTPUT);
@@ -86,8 +89,8 @@ void stop() {
   motorCommand(backLeftMotor, 0);
 }
 
-long startTime = millis();
-const long STOP_TIMEOUT = 1500 // Stop after 1.5 seconds of no commands
+
+const long STOP_TIMEOUT = 1500; // Stop after 1.5 seconds of no commands
 
 void loop() {
   long elapsed = millis() - startTime;
