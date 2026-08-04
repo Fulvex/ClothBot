@@ -9,7 +9,7 @@ source venv/bin/activate
 
 chmod +x ./execute.sh
 
-pip3 install pyserial pygame flask opencv-python numpy pyrealsense2 flask-socketio
+pip3 install pyserial pygame flask opencv-python numpy pyrealsense2 flask-socketio pupil-apriltags
 
 for pure ui:
 flask run

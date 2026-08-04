@@ -3,9 +3,10 @@ import threading
 import time
 
 import cv2
-from flask_socketio import SocketIO
 import numpy as np
 import pyrealsense2.pyrealsense2 as rs
+from flask_socketio import SocketIO
+from pupil_apriltags import Detector  # <-- 1. Import the detector
 
 
 class Camera:
@@ -54,6 +55,7 @@ class Camera:
                 print("Camera not connected")
     @staticmethod
     def socket_thread(socket : SocketIO):
+        at_detector = Detector(families="tag36h11")
         while (Camera.connected and Camera.pipeline is not None and Camera.align is not None):
             elapsed = time.perf_counter() - Camera.start_time
             if (elapsed < Camera.FRAME_DELAY):
@@ -68,12 +70,35 @@ class Camera:
                 #depth_profile = depth_frame.get_profile().as_video_stream_profile()
                 #intrinsics = depth_profile.get_intrinsics()
                 if color_frame:
-                    # 1. Process RGB Frame
+                    # 1. Process RGB Frame into a NumPy array
                     color_image = np.asanyarray(color_frame.get_data())
+
+                    # 2. Convert to grayscale for AprilTag detection
+                    gray = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
+                    tags = at_detector.detect(gray)
+
+                    # 3. Loop through detected tags and draw hitboxes/IDs
+                    for tag in tags:
+                        pts = [(int(corner[0]), int(corner[1])) for corner in tag.corners]
+
+                        # Draw the 4 lines of the hitbox (Green)
+                        for i in range(4):
+                            cv2.line(color_image, pts[i], pts[(i + 1) % 4], (0, 255, 0), 3)
+
+                        # Draw center point (Red)
+                        center = (int(tag.center[0]), int(tag.center[1]))
+                        cv2.circle(color_image, center, 4, (0, 0, 255), -1)
+
+                        # Put the Tag ID label above the box (Blue text)
+                        cv2.putText(color_image, f"ID: {tag.tag_id}", (pts[0][0], pts[0][1] - 10),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
+
+                    # 4. Encode the annotated frame to JPEG and base64
                     _, buffer_color = cv2.imencode(".jpg", color_image, [cv2.IMWRITE_JPEG_QUALITY, 80])
                     color_b64 = base64.b64encode(buffer_color).decode("utf-8")
                     Camera.color_b64 = color_b64
-                    if (not socket is None):
+
+                    if (socket is not None):
                         socket.emit("video_frame", {"image": Camera.color_b64})
             except:
                 print("Camera Read Failed")
