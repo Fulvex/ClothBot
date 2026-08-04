@@ -15,7 +15,7 @@ for pure ui:
 flask run
 
 setting up startup script:
-sudo nano /etc/systemd/system/ClothBot.service
+sudo nano /etc/systemd/system/clothbot.service
 
 [Unit]
 Description=ClothBot Server
@@ -23,7 +23,7 @@ After=NetworkManager.service network-online.target
 Wants=network-online.target
 
 [Service]
-User=ClothBot
+User=fulvex
 WorkingDirectory=/home/fulvex/ClothBot
 
 ExecStart=/bin/bash /home/fulvex/ClothBot/execute.sh
@@ -35,4 +35,5 @@ RestartSec=5
 WantedBy=multi-user.target
 
 To read:
-journalctl -u ClothBot -f
+sudo systemctl status clothbot
+journalctl -u clothbot -f

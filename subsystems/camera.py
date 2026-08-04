@@ -24,6 +24,7 @@ class Camera:
 
     @staticmethod
     def initiate(socket : SocketIO):
+        Camera.connected = False
         # --- Configure Intel RealSense Pipeline ---
         print("Connecting Camera")
         try:
