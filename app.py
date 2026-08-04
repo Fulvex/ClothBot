@@ -10,7 +10,13 @@ socketio = SocketIO(app, async_mode="threading")
 
 
 def get_telemetry():
-    return {"Robot On" : Robot.on, "Arduino Connected": Arduino.connected, "Camera Connected": Camera.connected, "Controller Mode" : Robot.controller_mode, "Controller Connected (Direct)" : Controller.connected}
+    return {"Robot On" : Robot.on,
+        "Arduino Connected": Arduino.connected,
+        "Camera Connected": Camera.connected,
+        "Controller Mode" : Robot.controller_mode,
+        "Controller Connected (Direct)" : Controller.connected,
+        "Robot State" : Robot.state
+    }
 
 def background_thread():
     """Background task to continuously process RealSense frames and push updates."""
@@ -48,15 +54,21 @@ def handle_robot_command(data):
             val = value
     if (command == None):
         return
-    if command == "DIRECT_CONTROL":
+    if command == "STATE":
+        if (isinstance(val,str)):
+            Robot.state = val
+    elif command == "DIRECT_CONTROL":
         Robot.controller_mode = Robot.DIRECT_CONTROLLER
+        Robot.state = RobotState.TELEOP
     elif command == "WEB_CONTROL":
         Robot.controller_mode = Robot.WEB_CONTROLLER
+        Robot.state = RobotState.TELEOP
     elif command == "DISCONNECT":
         Robot.stop()
     elif command == "CONNECT":
         Robot.initiate()
     elif command == "STOP":
+        Controller.left_stick_x,Controller.right_stick_x,Controller.left_stick_y = 0.0,0.0,0.0
         Arduino.stop()
     elif command == "GAMEPAD":
         if (not isinstance(val,str)):
