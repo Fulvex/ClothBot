@@ -58,10 +58,10 @@ def handle_robot_command(data):
         if (isinstance(val,str)):
             Robot.state = val
     elif command == "DIRECT_CONTROL":
-        Robot.controller_mode = Robot.DIRECT_CONTROLLER
+        Robot.controller_mode = ControllerState.DIRECT
         Robot.state = RobotState.TELEOP
     elif command == "WEB_CONTROL":
-        Robot.controller_mode = Robot.WEB_CONTROLLER
+        Robot.controller_mode = ControllerState.WEB_BASED
         Robot.state = RobotState.TELEOP
     elif command == "DISCONNECT":
         Robot.stop()
@@ -73,7 +73,7 @@ def handle_robot_command(data):
     elif command == "GAMEPAD":
         if (not isinstance(val,str)):
             return
-        if Robot.controller_mode == Robot.DIRECT_CONTROLLER:
+        if Robot.controller_mode == ControllerState.DIRECT:
             return
         x,_,val = val.partition(",")
         y,_,r = val.partition(",")
