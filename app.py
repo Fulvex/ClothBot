@@ -1,6 +1,5 @@
-import base64
-import threading
 import time
+
 from flask import Flask, render_template
 from flask_socketio import SocketIO
 
@@ -19,23 +18,14 @@ def background_thread():
     while True:
         try:
             Robot.run()
-            color_b64 = Camera.color_b64
-            # Emit both to the web browser
-            #socketio.emit("video_frame", {"image": color_b64})
-            # Handle Motor Telemetry
+            if (Camera.connected):
+                socketio.emit("video_frame", {"image": Camera.color_b64})
             socketio.emit("telemetry_update", get_telemetry())
-
-            time.sleep(0.05)
-
-        except Exception as e:
-            print(f"Stream error: {e}")
         finally:
             elapsed = time.perf_counter() - start_time
             if (elapsed < LOOP_DELAY):
                 time.sleep(LOOP_DELAY - elapsed)
             start_time = time.perf_counter()
-        
-
 
 @app.route("/")
 def index():
@@ -66,8 +56,18 @@ def handle_robot_command(data):
         Robot.stop()
     elif command == "CONNECT":
         Robot.initiate()
-
-
+    elif command == "STOP":
+        Arduino.stop()
+    elif command == "GAMEPAD":
+        if (not isinstance(val,str)):
+            return
+        if Robot.controller_mode == Robot.DIRECT_CONTROLLER:
+            return
+        x,_,val = val.partition(",")
+        y,_,r = val.partition(",")
+        x,y,r = float(x),float(y),float(r)
+        print(x,y,r)
+        Controller.left_stick_x,Controller.left_stick_y,Controller.right_stick_x = x,y,r
 
 if __name__ == "__main__":
     try:

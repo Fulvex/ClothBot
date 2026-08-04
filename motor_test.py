@@ -1,6 +1,6 @@
 import time
-from hardware import *
-from drivetrain import Drivetrain
+from subsystems.hardware import *
+from subsystems.drivetrain import Drivetrain
 time.sleep(1)
 Arduino.connect_arduino()
 time.sleep(1)

@@ -1,20 +1,24 @@
 import time
-from hardware import Arduino
-from drivetrain import Drivetrain
-from controller import Controller
-from camera import Camera
+
+from subsystems.camera import Camera
+from subsystems.controller import Controller
+from subsystems.drivetrain import Drivetrain
+from subsystems.hardware import Arduino
 
 LOOP_HZ = 50             # Control loop update rate (50 Hz = 20ms)
 LOOP_DELAY = 1.0 / LOOP_HZ
 
 class Robot:
-    DIRECT_CONTROLLER = "CONTROLLER"
+    DIRECT_CONTROLLER = "DIRECT_CONTROLLER"
     WEB_CONTROLLER = "WEB_CONTROLLER"
+    DEFAULT_CONTROLLER = WEB_CONTROLLER
 
-    controller_mode = DIRECT_CONTROLLER
+    controller_mode = DEFAULT_CONTROLLER
     on = False
+
+    @staticmethod
     def initiate():
-        Robot.controller_mode = Robot.DIRECT_CONTROLLER
+        Robot.controller_mode = Robot.DEFAULT_CONTROLLER
         Arduino.connect_arduino()
         time.sleep(1)
         Drivetrain.initiate()
@@ -23,6 +27,7 @@ class Robot:
         time.sleep(0.5)
         Camera.initiate()
         Robot.on = True
+    @staticmethod
     def stop():
         Robot.on = False
         Arduino.stop()
@@ -33,21 +38,17 @@ class Robot:
         time.sleep(0.1)
         if (Robot.controller_mode == Robot.DIRECT_CONTROLLER):
             Controller.disconnect()
+    @staticmethod
     def run():
         if (not Robot.on):
             return
-        x,y,r = 0,0,0
-        if Robot.controller_mode == Robot.WEB_CONTROLLER:
-            return
-        if not Controller.connected:
-            return
-        Controller.run()
-        controller = Controller.controller
-        x = Controller.apply_deadzone(controller.get_axis(Controller.AXIS_LEFT_STICK_X))
-        y = -Controller.apply_deadzone(controller.get_axis(Controller.AXIS_LEFT_STICK_Y))
-        r = Controller.apply_deadzone(controller.get_axis(Controller.AXIS_RIGHT_STICK_X))
+        x,y,r = Controller.left_stick_x, Controller.left_stick_y, Controller.right_stick_x
+        if Robot.controller_mode == Robot.DIRECT_CONTROLLER:
+            Controller.run()
+            if (not Controller.connected):
+                x,y,r = 0,0,0
         Drivetrain.run(x,y,r)
-        
+
 if __name__ == "__main__":
     try:
         Robot.initiate()
@@ -63,13 +64,5 @@ if __name__ == "__main__":
         print("🛑 Stopping all motors...")
         try:
             Robot.stop()
-        except Exception:
-            pass
-        print("✅ Shutdown complete.")
-
-
-
-
-
-
-    
+        finally:
+            print("✅ Shutdown complete.")

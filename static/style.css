@@ -1,0 +1,36 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    color: white;
+    background-color: black;
+}
+button {
+    padding: 10px 20px;
+    background-color: #171717;
+    color: white;
+    border-width: 1px;
+    border-radius: 2px;
+    border-color: white;
+    font-size: 1em;
+    cursor: pointer;
+    margin: 5px;
+}
+img {
+    border-radius: 4px;
+    background: #000;
+    width: 400px; height: 300px;
+    object-fit: contain; }
+.telemetry {
+    font-size: 1.2em;
+}
+.container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+.card {
+    padding: 20px;
+    border: 1px solid white;
+    border-radius: 8px;
+}

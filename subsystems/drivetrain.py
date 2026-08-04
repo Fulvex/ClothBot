@@ -1,14 +1,18 @@
-from hardware import *
+from subsystems.hardware import *
+
+
 class Drivetrain:
-    front_left = None
-    front_right = None
-    back_left = None
-    back_right = None
+    front_left : Motor
+    front_right : Motor
+    back_left : Motor
+    back_right : Motor
+    @staticmethod
     def initiate():
         Drivetrain.front_left = Motor(Device.FrontLeftDrive)
         Drivetrain.front_right = Motor(Device.FrontRightDrive)
         Drivetrain.back_right = Motor(Device.BackRightDrive)
         Drivetrain.back_left = Motor(Device.BackLeftDrive)
+    @staticmethod
     def run(x,y,r):
         # --- X-Drive Kinematics ---
         fl_power = -(y + x + r)
@@ -28,6 +32,7 @@ class Drivetrain:
         Drivetrain.front_right.run(fr_power)
         Drivetrain.back_left.run(bl_power)
         Drivetrain.back_right.run(br_power)
+    @staticmethod
     def stop():
         Drivetrain.front_left.stop()
         Drivetrain.front_right.stop()

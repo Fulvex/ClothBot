@@ -2,20 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Jetson Robot Dashboard</title>
+    <title>Robot Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f9; margin-top: 30px; }
-        .container { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        img { border-radius: 4px; background: #000; width: 400px; height: 300px; object-fit: contain; }
-        .telemetry { font-size: 1.2em; margin-top: 15px; }
-        button { padding: 10px 20px; font-size: 1em; cursor: pointer; margin: 5px; }
-    </style>
 </head>
 <body>
-    <h1>NVIDIA Jetson Robot Control Panel</h1>
-    
+    <h1>Robot Control Panel</h1>
+    <div style="margin-top: 20px; margin-bottom: 10px;">
+        <p>Connection Status: <span id="status" style="color: red;">Disconnected</span></p>
+        <p>Web Controller Status <span id="webControllerStatus" style="color: red;">Disconnected</span> </p>
+    </div>
     <div class="container">
         <div class="card">
             <h3>Live Camera Output (RGB)</h3>
@@ -38,55 +34,6 @@
             </div>
         </div>
     </div>
-
-    <div style="margin-top: 20px;">
-        <p>Connection Status: <span id="status" style="color: red;">Disconnected</span></p>
-    </div>
-
-    <script>
-        const socket = io();
-
-        socket.on('connect', function() {
-            document.getElementById('status').innerText = 'Connected';
-            document.getElementById('status').style.color = 'green';
-        });
-
-        socket.on('disconnect', function() {
-            document.getElementById('status').innerText = 'Disconnected';
-            document.getElementById('status').style.color = 'red';
-        });
-
-        function sendCommand(action, val) {
-            socket.emit('robot_command', { command: action, val: val });
-        }
-
-        // Handle both video stream and 2D map updates from server
-        socket.on('video_frame', function(data) {
-            document.getElementById('videoStream').src = 'data:image/jpeg;base64,' + data.image;
-        });
-        const telemetryDiv = document.getElementById("telemetry");
-        const telemetryElements = {};
-        socket.on('telemetry_update', function(data) {
-            for (const [label, value] of Object.entries(data)) {
-                if (!telemetryElements[label]) {
-                    const p = document.createElement("p");
-
-                    const strong = document.createElement("strong");
-                    strong.textContent = label + ": ";
-
-                    const span = document.createElement("span");
-
-                    p.appendChild(strong);
-                    p.appendChild(span);
-
-                    telemetryDiv.appendChild(p);
-
-                    telemetryElements[label] = span;
-                }
-
-                telemetryElements[label].textContent = value;
-            }
-        });
-    </script>
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
 </body>
 </html>

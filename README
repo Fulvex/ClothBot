@@ -1,15 +1,16 @@
 hey run these so no more squiggly lines
 also please use github
 
---WINDOWS--
-python -m venv venv
-venv/Scripts/Activate
-
-pip install pyserial
-
 --JETSON--
+To run:
+./execute.sh
+
 python3 -m venv venv
 source venv/bin/activate
 
-pip3 install pyserial
-pip3 install pygame flask opencv-python numpy pyrealsense2 flask-socketio
+chmod +x ./execute.sh
+
+pip3 install pyserial pygame flask opencv-python numpy pyrealsense2 flask-socketio
+
+for pure ui:
+flask run
