@@ -1,4 +1,4 @@
 #!/bin/bash
 
-sudo systemctl disable ClothBot
-sudo systemctl stop ClothBot
+sudo systemctl disable clothbot
+sudo systemctl stop clothbot
