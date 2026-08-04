@@ -43,6 +43,8 @@ Motor frontRightMotor = {FRONT_RIGHT_DRIVER_PORT, FRONT_RIGHT_PWM_PORT};
 Motor backLeftMotor = {BACK_LEFT_DRIVER_PORT, BACK_LEFT_PWM_PORT};
 Motor backRightMotor = {BACK_RIGHT_DRIVER_PORT, BACK_RIGHT_PWM_PORT};
 
+bool running = false;
+
 void setup() {
   startTime = millis();
   Serial.begin(115200);
@@ -63,6 +65,7 @@ void setup() {
   motorCommand(frontRightMotor, 0);
   motorCommand(backRightMotor, 0);
   motorCommand(backLeftMotor, 0);
+  running = false;
 }
 
 Motor getMotor(int id) {
@@ -94,8 +97,11 @@ const long STOP_TIMEOUT = 1500; // Stop after 1.5 seconds of no commands
 
 void loop() {
   long elapsed = millis() - startTime;
-  if (elapsed > STOP_TIMEOUT) {
-    stop();
+  if (running){
+    if (elapsed > STOP_TIMEOUT) {
+      stop();
+      running = false;
+    }
   }
   if (Serial.available() > 0) {
     String message = Serial.readStringUntil('\n');
@@ -106,6 +112,7 @@ void loop() {
     }
 
     startTime = millis();
+    running = true;
     if (cmd.id == Ping){
         return;
     }

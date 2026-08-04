@@ -23,8 +23,6 @@ def background_thread():
     while True:
         try:
             Robot.run()
-            if (Camera.connected):
-                socketio.emit("video_frame", {"image": Camera.color_b64})
             socketio.emit("telemetry_update", get_telemetry())
         finally:
             elapsed = time.perf_counter() - start_time

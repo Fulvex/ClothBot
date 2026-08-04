@@ -1,5 +1,7 @@
 import time
 
+from flask_socketio import SocketIO
+
 from subsystems.camera import Camera
 from subsystems.controller import Controller
 from subsystems.drivetrain import Drivetrain
@@ -29,13 +31,13 @@ class Robot:
     ping_start_time = time.perf_counter()
 
     @staticmethod
-    def initiate():
+    def initiate(socket : SocketIO):
         Robot.controller_mode = ControllerState.DEFAULT
         Controller.connect()
         time.sleep(0.5)
         if Controller.connected:
             Robot.controller_mode = ControllerState.DIRECT
-        Camera.initiate()
+        Camera.initiate(socket)
         time.sleep(0.5)
         Arduino.connect_arduino()
         time.sleep(1)
