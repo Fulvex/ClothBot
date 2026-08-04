@@ -87,10 +87,9 @@ def handle_robot_command(data):
 
 if __name__ == "__main__":
     try:
-        app = Flask(__name__)
-        socketio = SocketIO(app, async_mode="threading")
         time.sleep(1)
         Robot.initiate(socketio)
+        time.sleep(0.2)
         socketio.start_background_task(background_thread)
         socketio.run(app, host="0.0.0.0", port=5001, debug=False,allow_unsafe_werkzeug=True)
     except KeyboardInterrupt:
