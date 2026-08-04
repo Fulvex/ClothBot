@@ -43,7 +43,7 @@ class Camera:
             time.sleep(0.5)
             if (Camera.connected):
                 print("Threading started")
-                Camera.thread = threading.Thread(target=Camera.read)
+                Camera.thread = threading.Thread(target=Camera.run_thread)
                 Camera.thread.start()
                 Camera.start_time = time.perf_counter()
             else:
