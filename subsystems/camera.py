@@ -56,7 +56,6 @@ class Camera:
             if (elapsed < Camera.FRAME_DELAY):
                 time.sleep(Camera.FRAME_DELAY - elapsed)
             Camera.start_time = time.perf_counter()
-            print("Capturing Camera")
             try:
                 frames = Camera.pipeline.wait_for_frames()
                 aligned_frames = Camera.align.process(frames)
@@ -71,7 +70,6 @@ class Camera:
                     color_image = np.asanyarray(color_frame.get_data())
                     _, buffer_color = cv2.imencode(".jpg", color_image, [cv2.IMWRITE_JPEG_QUALITY, 80])
                     color_b64 = base64.b64encode(buffer_color).decode("utf-8")
-                    print("updating color")
                     Camera.color_b64 = color_b64
                     if (not socket is None):
                         socket.emit("video_frame", {"image": Camera.color_b64})

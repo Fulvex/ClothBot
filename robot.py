@@ -73,21 +73,3 @@ class Robot:
             if (not Controller.connected):
                 x,y,r = 0,0,0
         Drivetrain.run(x,y,r)
-
-if __name__ == "__main__":
-    try:
-        Robot.initiate()
-        time.sleep(1)
-        while True:
-            Robot.run()
-            time.sleep(LOOP_DELAY)
-    except KeyboardInterrupt:
-        print("\n⚠️ Interrupted by user. Shutting down...")
-    except Exception as e:
-        print(f"\n❌ Unexpected error: {e}")
-    finally:
-        print("🛑 Stopping all motors...")
-        try:
-            Robot.stop()
-        finally:
-            print("✅ Shutdown complete.")
