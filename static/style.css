@@ -15,11 +15,13 @@ button {
     cursor: pointer;
     margin: 5px;
 }
-img {
+.camera{
     border-radius: 4px;
     background: #000;
-    width: 400px; height: 300px;
-    object-fit: contain; }
+    width: 640px;
+    height: 380px;
+    object-fit: contain;
+}
 .telemetry {
     font-size: 1.2em;
 }

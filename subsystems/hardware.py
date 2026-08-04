@@ -6,6 +6,7 @@ import serial.tools.list_ports
 
 class Device:
     Stop = -1
+    Ping = 0
     FrontLeftDrive = 1
     FrontRightDrive = 2
     BackRightDrive = 3
@@ -43,11 +44,15 @@ class Arduino:
                 Arduino.connected = True
                 print(f"✅ Successfully connected to Arduino on {p}")
                 return
-            except Exception:
-                continue
-
-        print("❌ Could not connect to Arduino on any port.")
-
+            finally:
+                if (Arduino.connected):
+                    Arduino.ping()
+                else:
+                    print("❌ Could not connect to Arduino on any port.")
+    @staticmethod
+    def ping():
+        print("Pinging...")
+        Arduino.send_command(f'{Device.Ping},0')
     @staticmethod
     def send_command(command, read=False, override=False):
         if not Arduino.connected and not override:

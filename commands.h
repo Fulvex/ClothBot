@@ -23,6 +23,7 @@ Command parseCommand(const char* input)
 
 enum Device {
     Stop = -1,
+    Ping = 0,
     FrontLeftDrive = 1,
     FrontRightDrive = 2,
     BackRightDrive = 3,
@@ -56,4 +57,3 @@ char deviceToType(int id){
 }
 
 #endif
-

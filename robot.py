@@ -7,6 +7,8 @@ from subsystems.hardware import Arduino
 
 LOOP_HZ = 50             # Control loop update rate (50 Hz = 20ms)
 LOOP_DELAY = 1.0 / LOOP_HZ
+PING_HZ = 2
+PING_DELAY = 1.0 / PING_HZ
 
 class Robot:
     DIRECT_CONTROLLER = "DIRECT_CONTROLLER"
@@ -16,16 +18,18 @@ class Robot:
     controller_mode = DEFAULT_CONTROLLER
     on = False
 
+    ping_start_time = time.perf_counter()
+
     @staticmethod
     def initiate():
         Robot.controller_mode = Robot.DEFAULT_CONTROLLER
-        Arduino.connect_arduino()
-        time.sleep(1)
-        Drivetrain.initiate()
-        time.sleep(0.5)
         Controller.connect()
         time.sleep(0.5)
         Camera.initiate()
+        time.sleep(0.5)
+        Arduino.connect_arduino()
+        time.sleep(1)
+        Drivetrain.initiate()
         Robot.on = True
     @staticmethod
     def stop():
@@ -42,6 +46,10 @@ class Robot:
     def run():
         if (not Robot.on):
             return
+        elapsed = time.perf_counter() - Robot.ping_start_time
+        if (elapsed > PING_DELAY):
+            Arduino.ping()
+            Robot.ping_start_time = time.perf_counter()
         x,y,r = Controller.left_stick_x, Controller.left_stick_y, Controller.right_stick_x
         if Robot.controller_mode == Robot.DIRECT_CONTROLLER:
             Controller.run()

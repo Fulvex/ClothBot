@@ -3,8 +3,7 @@ also please use github
 
 --JETSON--
 To run:
-./execute.sh
-
+c
 python3 -m venv venv
 source venv/bin/activate
 
