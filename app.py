@@ -71,7 +71,7 @@ def handle_robot_command(data):
     elif command == "DISCONNECT":
         Robot.stop()
     elif command == "CONNECT":
-        Robot.initiate()
+        Robot.initiate(socketio)
     elif command == "STOP":
         Controller.zero_joysticks()
         Arduino.stop()
@@ -87,10 +87,10 @@ def handle_robot_command(data):
 
 if __name__ == "__main__":
     try:
-        Robot.initiate()
+        Robot.initiate(socketio)
         socketio.start_background_task(background_thread)
         socketio.run(app, host="0.0.0.0", port=5000, debug=False)
-    except KeyboardInterrupt as e:
+    except KeyboardInterrupt:
         print("User interupting")
     finally:
         Robot.stop()
