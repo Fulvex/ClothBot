@@ -1,4 +1,6 @@
 import base64
+import threading
+import time
 
 import cv2
 import numpy as np
@@ -11,6 +13,14 @@ class Camera:
     align : rs.align
 
     color_b64 : str = ""
+
+    start_time = time.perf_counter()
+
+    FRAME_RATE_HZ = 30
+    FRAME_DELAY = 1.0 / FRAME_RATE_HZ
+
+    thread : threading.Thread
+
     @staticmethod
     def initiate():
         # --- Configure Intel RealSense Pipeline ---
@@ -20,7 +30,7 @@ class Camera:
             config = rs.config()
 
             # Enable Color and Depth streams at 640x480, 30 FPS
-            config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+            config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, Camera.FRAME_RATE_HZ)
             #config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
 
             Camera.pipeline.start(config)
@@ -29,12 +39,22 @@ class Camera:
             Camera.align = rs.align(rs.stream.color)
             Camera.connected = True
             print("Camera connected! (if I was gemini I would put an emoji here)")
-        except:
-            print("Camera not connected")
+        finally:
+            if (Camera.connected):
+                Camera.thread = threading.Thread(target=Camera.read)
+                Camera.thread.start()
+            else:
+                print("Camera not connected")
     @staticmethod
     def read():
         if (not Camera.connected or Camera.pipeline == None or Camera.align == None):
             return
+        elapsed = time.perf_counter() - Camera.start_time
+
+        if (elapsed < Camera.FRAME_DELAY):
+            time.sleep(Camera.FRAME_DELAY - elapsed)
+        Camera.start_time = time.perf_counter()
+
         try:
             frames = Camera.pipeline.wait_for_frames()
             aligned_frames = Camera.align.process(frames)

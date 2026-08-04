@@ -57,7 +57,6 @@ class Robot:
     def run():
         if (not Robot.on):
             return
-        Camera.read()
         elapsed = time.perf_counter() - Robot.ping_start_time
         if (elapsed > PING_DELAY):
             Arduino.ping()
