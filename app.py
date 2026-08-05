@@ -1,9 +1,7 @@
 import time
-from tokenize import String
 
 from flask import Flask, render_template
 from flask_socketio import SocketIO
-from pygame import math
 
 from robot import *
 
