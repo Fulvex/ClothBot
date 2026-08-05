@@ -1,6 +1,8 @@
+import threading
 import time
 
 from flask_socketio import SocketIO
+from pygame.threads import Thread
 
 from subsystems.camera import Camera
 from subsystems.controller import Controller
@@ -21,14 +23,15 @@ class ControllerState:
     DEFAULT = WEB_BASED
 
 class Robot:
-
-
     controller_mode = ControllerState.DEFAULT
     on = False
 
     state = RobotState.TELEOP
 
     ping_start_time = time.perf_counter()
+    start_time = time.perf_counter()
+
+    thread : Thread
 
     @staticmethod
     def initiate(socket : SocketIO):
@@ -42,7 +45,12 @@ class Robot:
         Arduino.connect_arduino()
         time.sleep(1)
         Drivetrain.initiate()
+        time.sleep(0.5)
         Robot.on = True
+        Robot.thread = threading.Thread(target=Robot.run)
+        Robot.thread.start()
+        Robot.start_time = time.perf_counter()
+
     @staticmethod
     def stop():
         print("Stopping Robot")
@@ -55,24 +63,29 @@ class Robot:
         time.sleep(0.1)
         if (Robot.controller_mode == ControllerState.DIRECT):
             Controller.disconnect()
+        if (Robot.thread is not None):
+            Robot.thread.join()
     @staticmethod
     def run():
-        if (not Robot.on):
-            return
-        elapsed = time.perf_counter() - Robot.ping_start_time
-        if (elapsed > PING_DELAY):
-            Arduino.ping()
-            Robot.ping_start_time = time.perf_counter()
+        while Robot.on:
+            elapsed = time.perf_counter() - Robot.start_time
+            if (elapsed < LOOP_DELAY):
+                time.sleep(LOOP_DELAY - elapsed)
+                Robot.start_time = time.perf_counter()
+            elapsed = time.perf_counter() - Robot.ping_start_time
+            if (elapsed > PING_DELAY):
+                Arduino.ping()
+                Robot.ping_start_time = time.perf_counter()
 
-        if Robot.state == RobotState.IDLE:
-            return
-
-        x,y,r = Controller.left_stick_x, Controller.left_stick_y, Controller.right_stick_x
-        if Robot.controller_mode == ControllerState.DIRECT:
-            Controller.run()
-            if (not Controller.connected):
-                x,y,r = 0,0,0
-        if (Robot.state == RobotState.AUTO):
-            Camera.tag_enabled = True
-            r = Camera.turn
-        Drivetrain.run(x,y,r)
+            if Robot.state == RobotState.IDLE:
+                continue
+            x,y,r = Controller.left_stick_x, Controller.left_stick_y, Controller.right_stick_x
+            if Robot.controller_mode == ControllerState.DIRECT:
+                Controller.run()
+                if (not Controller.connected):
+                    x,y,r = 0,0,0
+            if (Robot.state == RobotState.AUTO):
+                Camera.tag_enabled = True
+                r = Camera.turn
+                y = Camera.drive
+            Drivetrain.run(x,y,r)

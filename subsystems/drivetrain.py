@@ -14,6 +14,8 @@ class Drivetrain:
         Drivetrain.back_left = Motor(Device.BackLeftDrive)
     @staticmethod
     def run(x,y,r):
+        if (not Arduino.connected):
+            return
         # --- X-Drive Kinematics ---
         fl_power = -(y + x + r)
         fr_power = -(y - x - r)

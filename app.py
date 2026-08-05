@@ -1,13 +1,17 @@
 import time
+from tokenize import String
 
 from flask import Flask, render_template
 from flask_socketio import SocketIO
+from pygame import math
 
 from robot import *
 
 app = Flask(__name__)
 socketio = SocketIO(app, async_mode="threading")
 
+TELEMETRY_UPDATE_HZ = 4
+TELEMETRY_UPDATE_TIME = 1 / TELEMETRY_UPDATE_HZ
 
 def get_telemetry():
     return {"Robot On" : Robot.on,
@@ -17,20 +21,28 @@ def get_telemetry():
         "Controller Connected (Direct)" : Controller.connected,
         "Robot State" : Robot.state
     }
-
+def get_tag_data():
+    return {
+        "Detector Enabled" : Camera.tag_enabled,
+        "Visible": Camera.tag_visible,
+        "Closest ID": Camera.closest_id,
+        "Closest Distance": str(Camera.closest_distance)[:5],
+        "Turn" : str(Camera.turn)[:5],
+        "Drive" : str(Camera.drive)[:5]
+    }
 def background_thread():
     start_time = time.perf_counter()
     while True:
+        elapsed = time.perf_counter() - start_time
         try:
-            Robot.run()
             socketio.emit("telemetry_update", get_telemetry())
-            socketio.emit("tag_update", Camera.get_tag_data())
+            socketio.emit("tag_update", get_tag_data())
+        except:
+            print("Error in background thread")
         finally:
-            elapsed = time.perf_counter() - start_time
-            if (elapsed < LOOP_DELAY):
-                time.sleep(LOOP_DELAY - elapsed)
+            if (elapsed < TELEMETRY_UPDATE_TIME):
+                time.sleep(TELEMETRY_UPDATE_TIME - elapsed)
             start_time = time.perf_counter()
-
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -46,6 +58,7 @@ def handle_disconnect():
     Controller.zero_joysticks()
     Robot.stop()
     Robot.controller_mode = ControllerState.DIRECT
+    Robot.state = RobotState.IDLE
 
 
 
@@ -94,7 +107,7 @@ if __name__ == "__main__":
     try:
         time.sleep(1)
         Robot.initiate(socketio)
-        time.sleep(0.2)
+        time.sleep(0.5)
         socketio.start_background_task(background_thread)
         socketio.run(app, host="0.0.0.0", port=5001, debug=False,allow_unsafe_werkzeug=True)
     except KeyboardInterrupt:

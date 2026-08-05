@@ -26,28 +26,28 @@ class Camera:
 
     thread : threading.Thread
 
-    TURN_P = 0.3
-    DRIVE_P = 0.3
+    TURN_P = 0.8
+    DRIVE_P = 0.12
 
     MAX_TURN = 1
-    MAX_DRIVE = 1
+    MAX_DRIVE = 0.5
 
     MIN_TURN = 0.05
     MIN_DRIVE = 0.05
 
-    MIN_DISTANCE = 10 #inches
+    MIN_DISTANCE = 8 #inches
 
-    turn = 0.2
-    drive = 0.3
+    turn = 0
+    drive = 0
 
     WIDTH = 640
     HEIGHT = 480
 
-    tag_enabled = False
+    tag_enabled : bool = False
 
-    closest_id = None
-    closest_distance = float('inf')
-    tag_visible = False
+    closest_id : int = -1
+    closest_distance : float = 10000
+    tag_visible : bool = False
 
     @staticmethod
     def initiate(socket : SocketIO):
@@ -99,14 +99,16 @@ class Camera:
                 Camera.drive = 0
 
                 Camera.tag_visible = False
-                Camera.closest_distance = float('inf')
-                Camera.closest_id = None
+                Camera.closest_distance = 10000
+                Camera.closest_id = -1
 
                 if color_frame:
                     color_image = np.asanyarray(color_frame.get_data())
                     if (Camera.tag_enabled):
                         gray = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
-                        tags = at_detector.detect(gray)
+                        camera_params = [325.0, 325.0, 320.0, 240.0]
+                        tag_size = .1651 #meters
+                        tags = at_detector.detect(gray,estimate_tag_pose=True, camera_params=camera_params, tag_size=tag_size)  # pyright: ignore[reportArgumentType]
 
                         for tag in tags:  # pyright: ignore[reportGeneralTypeIssues]
                             Camera.tag_visible = True
@@ -125,12 +127,12 @@ class Camera:
                                         cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
 
                             translation = tag.pose_t
+                            if (translation is None):
+                                continue
                             perpendicular_distance = translation[2][0]  # Z distance in meters
-
-                            print(f"Tag ID: {tag.tag_id}, Distance: {perpendicular_distance:.3f} m")
-
+                            if (perpendicular_distance < 0 or perpendicular_distance is None):
+                                continue
                             perpendicular_distance = meters_to_inches(perpendicular_distance)
-
                             if (perpendicular_distance < Camera.closest_distance):
                                 Camera.closest_id = tag.tag_id
                                 Camera.closest_distance = perpendicular_distance
@@ -138,6 +140,7 @@ class Camera:
                                 continue
 
                             Camera.turn = Camera.TURN_P * ((center[0] - Camera.WIDTH // 2) / Camera.WIDTH)
+                            perpendicular_distance = max(perpendicular_distance, Camera.MIN_DISTANCE)
                             Camera.drive = Camera.DRIVE_P * perpendicular_distance / Camera.MIN_DISTANCE
 
                             Camera.turn = max(-Camera.MAX_TURN, min(Camera.turn, Camera.MAX_TURN))
@@ -159,16 +162,6 @@ class Camera:
                 print("Camera Read Failed")
 
         Camera.connected = False
-    @staticmethod
-    def get_tag_data():
-        return {
-            "DETECTOR_ENABLED" : Camera.tag_enabled,
-            "VISIBLE": Camera.tag_visible,
-            "CLOSEST_ID": Camera.closest_id,
-            "CLOSEST_DISTANCE": Camera.closest_distance,
-            "TURN" : Camera.turn,
-            "DRIVE" : Camera.drive
-        }
     @staticmethod
     def stop():
         if (not Camera.connected):

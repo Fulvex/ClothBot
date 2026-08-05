@@ -151,7 +151,8 @@ socket.on('tag_update', function(data) {
         tagElements[label].textContent = value;
     }
 });
-
+const telemetryDiv = document.getElementById("telemetry");
+const telemetryElements = {};
 socket.on('telemetry_update', function(data) {
     for (const [label, value] of Object.entries(data)) {
         if (!telemetryElements[label]) {
