@@ -24,6 +24,7 @@ def background_thread():
         try:
             Robot.run()
             socketio.emit("telemetry_update", get_telemetry())
+            socketio.emit("tag_update", Camera.get_tag_data())
         finally:
             elapsed = time.perf_counter() - start_time
             if (elapsed < LOOP_DELAY):

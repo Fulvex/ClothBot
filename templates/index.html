@@ -15,24 +15,26 @@
     <div class="container">
         <div class="card">
             <h3>Live Camera Output (RGB)</h3>
-            <img id="videoStream" alt="Waiting for video feed..." />
+            <img style="width: 640px; height: 480px;" id="videoStream" alt="Waiting for video feed..."/>
         </div>
 
         <div class="card">
             <h3>Telemetry</h3>
-            <div class="telemetry" id="telemetry">
-                <!-- Filled automatically -->
-            </div>
+            <div class="telemetry" id="telemetry"></div>
+        </div>
+        <div class="card">
+            <h3>Tag Data</h3>
+            <div class="telemetry" id="tag_data"></div>
         </div>
         <div class="card">
             <h3>Robot Commands</h3>
             <div class="Commands">
-                <button onclick="sendCommand('STATE', 'IDLE')">IDLE</button>
-                <button onclick="sendCommand('STATE', 'AUTO')">AUTO</button>
+                <button style="border-color: yellow;" onclick="sendCommand('STATE', 'IDLE')">IDLE</button>
+                <button style="border-color: yellow;" onclick="sendCommand('STATE', 'AUTO')">AUTO</button>
                 <button onclick="sendCommand('DIRECT_CONTROL', 0)">Direct Controller Mode</button>
                 <button onclick="sendCommand('WEB_CONTROL', 0)">Web Based Controller Mode</button>
-                <button onclick="sendCommand('DISCONNECT', 0)">DISCONNECT</button>
-                <button onclick="sendCommand('CONNECT', 0)">CONNECT</button>
+                <button style="border-color: red;" onclick="sendCommand('DISCONNECT', 0)">DISCONNECT</button>
+                <button style="border-color: lime;" onclick="sendCommand('CONNECT', 0)">CONNECT</button>
             </div>
         </div>
     </div>

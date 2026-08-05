@@ -129,8 +129,28 @@ socket.on('video_frame', function(data) {
     document.getElementById('videoStream').src = 'data:image/jpeg;base64,' + data.image;
 });
 
-const telemetryDiv = document.getElementById("telemetry");
-const telemetryElements = {};
+const tagDiv = document.getElementById("tag_data");
+const tagElements = {};
+socket.on('tag_update', function(data) {
+    for (const [label, value] of Object.entries(data)) {
+        if (!tagElements[label]) {
+            const p = document.createElement("p");
+
+            const strong = document.createElement("strong");
+            strong.textContent = label + ": ";
+
+            const span = document.createElement("span");
+
+            p.appendChild(strong);
+            p.appendChild(span);
+
+            tagDiv.appendChild(p);
+
+            tagElements[label] = span;
+        }
+        tagElements[label].textContent = value;
+    }
+});
 
 socket.on('telemetry_update', function(data) {
     for (const [label, value] of Object.entries(data)) {

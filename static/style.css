@@ -24,6 +24,8 @@ button {
 }
 .telemetry {
     font-size: 1.2em;
+    min-height: 200px;
+    min-width: 200px;
 }
 .container {
     display: flex;

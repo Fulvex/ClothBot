@@ -37,6 +37,8 @@ class Arduino:
         deduped_ports = [p for p in ports_to_try if not (p in seen or seen.add(p))]
 
         for p in deduped_ports:
+            if (Arduino.connected):
+                return
             try:
                 print(f"Connecting to Arduino on {p}...")
                 Arduino.serial = serial.Serial(p, 115200, timeout=Arduino.TIMEOUT)
@@ -44,6 +46,8 @@ class Arduino:
                 Arduino.connected = True
                 print(f"✅ Successfully connected to Arduino on {p}")
                 return
+            except:
+                print(f"❌ Could not connect to Arduino on {p}")
             finally:
                 if (Arduino.connected):
                     Arduino.ping()

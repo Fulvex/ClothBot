@@ -6,8 +6,11 @@ import cv2
 import numpy as np
 import pyrealsense2.pyrealsense2 as rs
 from flask_socketio import SocketIO
-from pupil_apriltags import Detector  # <-- 1. Import the detector
+from pupil_apriltags import Detector
 
+
+def meters_to_inches(meters):
+    return meters * 39.3700787402
 
 class Camera:
     connected = False
@@ -23,19 +26,28 @@ class Camera:
 
     thread : threading.Thread
 
-    TURN_P = 0.01
-    DRIVE_P = 0.01
+    TURN_P = 0.3
+    DRIVE_P = 0.3
 
     MAX_TURN = 1
     MAX_DRIVE = 1
 
-    turn = 0.3
+    MIN_TURN = 0.05
+    MIN_DRIVE = 0.05
+
+    MIN_DISTANCE = 10 #inches
+
+    turn = 0.2
     drive = 0.3
 
     WIDTH = 640
     HEIGHT = 480
 
     tag_enabled = False
+
+    closest_id = None
+    closest_distance = float('inf')
+    tag_visible = False
 
     @staticmethod
     def initiate(socket : SocketIO):
@@ -83,16 +95,21 @@ class Camera:
                 #depth_frame = aligned_frames.get_depth_frame()
                 #depth_profile = depth_frame.get_profile().as_video_stream_profile()
                 #intrinsics = depth_profile.get_intrinsics()
+                Camera.turn = 0
+                Camera.drive = 0
+
+                Camera.tag_visible = False
+                Camera.closest_distance = float('inf')
+                Camera.closest_id = None
+
                 if color_frame:
-                    # 1. Process RGB Frame into a NumPy array
                     color_image = np.asanyarray(color_frame.get_data())
                     if (Camera.tag_enabled):
-                        # 2. Convert to grayscale for AprilTag detection
                         gray = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
                         tags = at_detector.detect(gray)
 
-                        # 3. Loop through detected tags and draw hitboxes/IDs
-                        for tag in tags:
+                        for tag in tags:  # pyright: ignore[reportGeneralTypeIssues]
+                            Camera.tag_visible = True
                             pts = [(int(corner[0]), int(corner[1])) for corner in tag.corners]
 
                             # Draw the 4 lines of the hitbox (Green)
@@ -107,12 +124,29 @@ class Camera:
                             cv2.putText(color_image, f"ID: {tag.tag_id}", (pts[0][0], pts[0][1] - 10),
                                         cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
 
-                            Camera.turn = Camera.TURN_P * (center[0] - Camera.WIDTH // 2)
-                            Camera.drive = 0 #TBA with distance
+                            translation = tag.pose_t
+                            perpendicular_distance = translation[2][0]  # Z distance in meters
 
-                            # Clamp turn and drive values
+                            print(f"Tag ID: {tag.tag_id}, Distance: {perpendicular_distance:.3f} m")
+
+                            perpendicular_distance = meters_to_inches(perpendicular_distance)
+
+                            if (perpendicular_distance < Camera.closest_distance):
+                                Camera.closest_id = tag.tag_id
+                                Camera.closest_distance = perpendicular_distance
+                            else:
+                                continue
+
+                            Camera.turn = Camera.TURN_P * ((center[0] - Camera.WIDTH // 2) / Camera.WIDTH)
+                            Camera.drive = Camera.DRIVE_P * perpendicular_distance / Camera.MIN_DISTANCE
+
                             Camera.turn = max(-Camera.MAX_TURN, min(Camera.turn, Camera.MAX_TURN))
                             Camera.drive = max(-Camera.MAX_DRIVE, min(Camera.drive, Camera.MAX_DRIVE))
+
+                            if abs(Camera.turn) < Camera.MIN_TURN:
+                                Camera.turn = 0
+                            if abs(Camera.drive) < Camera.MIN_DRIVE:
+                                Camera.drive = 0
 
                     # 4. Encode the annotated frame to JPEG and base64
                     _, buffer_color = cv2.imencode(".jpg", color_image, [cv2.IMWRITE_JPEG_QUALITY, 80])
@@ -125,7 +159,16 @@ class Camera:
                 print("Camera Read Failed")
 
         Camera.connected = False
-
+    @staticmethod
+    def get_tag_data():
+        return {
+            "DETECTOR_ENABLED" : Camera.tag_enabled,
+            "VISIBLE": Camera.tag_visible,
+            "CLOSEST_ID": Camera.closest_id,
+            "CLOSEST_DISTANCE": Camera.closest_distance,
+            "TURN" : Camera.turn,
+            "DRIVE" : Camera.drive
+        }
     @staticmethod
     def stop():
         if (not Camera.connected):
