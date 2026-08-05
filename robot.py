@@ -20,7 +20,7 @@ class RobotState:
 class ControllerState:
     DIRECT = "DIRECT_CONTROLLER"
     WEB_BASED = "WEB_CONTROLLER"
-    DEFAULT = WEB_BASED
+    DEFAULT = DIRECT
 
 class Robot:
     controller_mode = ControllerState.DEFAULT
