@@ -85,7 +85,7 @@ function handleButtons(buttons) {
   if (xButton && !prevXButton) {
     sendCommand('STOP', 0)
   }
-  if (rb && !prevRB) {
+  if (buttons[RIGHT_BUMPER].pressed) {
     sendCommand('STATE', 'SWAP')
   }
   // Analog triggers show pressure from 0.0 to 1.0
