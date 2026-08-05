@@ -49,6 +49,8 @@ class Camera:
     closest_distance : float = 10000
     tag_visible : bool = False
 
+    VISIBILITY_LOSS_DECAY = 0.75
+
     @staticmethod
     def initiate(socket : SocketIO):
         Camera.connected = False
@@ -95,8 +97,13 @@ class Camera:
                 #depth_frame = aligned_frames.get_depth_frame()
                 #depth_profile = depth_frame.get_profile().as_video_stream_profile()
                 #intrinsics = depth_profile.get_intrinsics()
-                Camera.turn = 0
-                Camera.drive = 0
+                Camera.turn = Camera.turn * Camera.VISIBILITY_LOSS_DECAY
+                Camera.drive = Camera.drive * Camera.VISIBILITY_LOSS_DECAY
+
+                if (abs(Camera.turn) < Camera.MIN_TURN):
+                    Camera.turn = 0
+                if (abs(Camera.drive) < Camera.MIN_DRIVE):
+                    Camera.drive = 0
 
                 Camera.tag_visible = False
                 Camera.closest_distance = 10000
