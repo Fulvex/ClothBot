@@ -10,12 +10,16 @@ class Controller:
     AXIS_LEFT_STICK_Y = 1    # Forward / Backward
     AXIS_RIGHT_STICK_X = 3   # Rotation (CW / CCW)
 
+    RIGHT_BUMPER = 5
+
     DEADZONE = 0.12          # Filters out stick drift below 12% deflection
 
     controller : JoystickType
     connected = False
 
     left_stick_x,left_stick_y,right_stick_x = 0.0,0.0,0.0 #I switched my code editor to zed and it for some reason loves consistent data types so these are floats...
+
+    prev_rb = False
     @staticmethod
     def apply_deadzone(value: float, threshold: float = DEADZONE) -> float:
         """Zeroes out minor joystick drift around center."""

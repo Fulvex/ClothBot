@@ -84,6 +84,15 @@ class Robot:
                 Controller.run()
                 if (not Controller.connected):
                     x,y,r = 0,0,0
+                else:
+                    if Controller.controller.get_button(Controller.RIGHT_BUMPER) and not Controller.prev_rb:
+                        if (Robot.state == RobotState.TELEOP):
+                            Robot.state = RobotState.AUTO
+                            Camera.tag_enabled = True
+                        else:
+                            Robot.state = RobotState.TELEOP
+                            Camera.tag_enabled = False
+                    Controller.prev_rb = Controller.controller.get_button(Controller.RIGHT_BUMPER)
             if (Robot.state == RobotState.AUTO):
                 Camera.tag_enabled = True
                 r = Camera.turn

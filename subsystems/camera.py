@@ -146,12 +146,18 @@ class Camera:
                             else:
                                 continue
 
+
+
                             Camera.turn = Camera.TURN_P * ((center[0] - Camera.WIDTH // 2) / Camera.WIDTH)
                             perpendicular_distance = max(perpendicular_distance, Camera.MIN_DISTANCE)
                             Camera.drive = Camera.DRIVE_P * perpendicular_distance / Camera.MIN_DISTANCE
 
                             Camera.turn = max(-Camera.MAX_TURN, min(Camera.turn, Camera.MAX_TURN))
                             Camera.drive = max(-Camera.MAX_DRIVE, min(Camera.drive, Camera.MAX_DRIVE))
+
+                            if (tag.tag_id == 30):
+                                Camera.turn *= -1
+                                Camera.drive *= -1
 
                             if abs(Camera.turn) < Camera.MIN_TURN:
                                 Camera.turn = 0

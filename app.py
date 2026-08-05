@@ -72,8 +72,17 @@ def handle_robot_command(data):
     if (command == None):
         return
     if command == "STATE":
-        if (isinstance(val,str)):
-            Robot.state = val
+        if (not isinstance(val,str)):
+            return
+        if (val == 'SWAP'):
+            if (Robot.state == RobotState.TELEOP):
+                Robot.state = RobotState.AUTO
+                Camera.tag_enabled = True
+            else:
+                Robot.state = RobotState.TELEOP
+                Camera.tag_enabled = False
+                return
+        Robot.state = val
         if (val == RobotState.AUTO):
             Camera.tag_enabled = True
         else:

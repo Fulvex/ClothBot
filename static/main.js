@@ -12,10 +12,10 @@ const JOYSTICK_CHANGE_THRESHOLD = 0.02;
 var leftX = 0;
 var leftY = 0;
 var rightX = 0;
-var leftBumper = 0;
-var rightBumper = 0;
-var leftTrigger = 0;
-var rightTrigger = 0;
+var lt = 0;
+var rb = 0;
+var lt = 0;
+var rt = 0;
 var xButton = 0;
 var yButton = 0;
 var aButton = 0;
@@ -23,10 +23,10 @@ var bButton = 0;
 var prevLeftX = 0;
 var prevLeftY = 0;
 var prevRightX = 0;
-var prevLeftBumper = 0;
-var prevRightBumper = 0;
-var prevLeftTrigger = 0;
-var prevRightTrigger = 0;
+var prevLB = 0;
+var prevRB = 0;
+var prevLT = 0;
+var prevRT = 0;
 var prevXButton = 0;
 var prevYButton = 0;
 var prevAButton = 0;
@@ -79,9 +79,14 @@ function startGameLoop() {
 
 function handleButtons(buttons) {
   prevXButton = xButton;
+  prevRB = rb;
   xButton = buttons[X_BUTTON].value;
+  rb = buttons[RIGHT_BUMPER].value;
   if (xButton && !prevXButton) {
     sendCommand('STOP', 0)
+  }
+  if (rb && !prevRB) {
+    sendCommand('STATE', 'SWAP')
   }
   // Analog triggers show pressure from 0.0 to 1.0
   const rightTriggerValue = buttons[RIGHT_TRIGGER].value;
