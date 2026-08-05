@@ -81,7 +81,7 @@ def handle_robot_command(data):
             else:
                 Robot.state = RobotState.TELEOP
                 Camera.tag_enabled = False
-                return
+            return
         Robot.state = val
         if (val == RobotState.AUTO):
             Camera.tag_enabled = True
