@@ -180,6 +180,7 @@ class Camera:
                     if (socket is not None):
                         Camera.frame_number +=1
                         if (Camera.frame_number > Camera.FRAMES_PER_TRANSMISSION):
+                            print("Sending frame")
                             socket.emit("video_frame", {"image": Camera.color_bytes})
                             Camera.frame_number = 0
             except:

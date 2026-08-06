@@ -137,7 +137,14 @@ socket.on('video_frame', function(data) {
       binary += String.fromCharCode(uint8Arr[i]);
   }
   var base64String = window.btoa(binary);
-  document.getElementById('videoStream').src = 'data:image/jpg;base64,' + base64String;
+
+  var img = new Image();
+  img.onload = function() {
+      var canvas = document.getElementById('videoStream');
+      var ctx = canvas.getContext('2d');
+      var x = 0, y = 0;
+      ctx.drawImage(this, x, y);
+  }
 });
 
 const tagDiv = document.getElementById("tag_data");
