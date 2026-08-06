@@ -175,7 +175,7 @@ class Camera:
 
                     # 4. Encode the annotated frame to JPEG and base64
                     _, buffer_color = cv2.imencode(".jpg", color_image, [cv2.IMWRITE_JPEG_QUALITY, 50])
-                    Camera.color_bytes = buffer_color
+                    Camera.color_bytes = buffer_color.tobytes()
 
                     if (socket is not None):
                         Camera.frame_number +=1
