@@ -15,8 +15,11 @@ class RadioHeaders:
     MESSAGE = 'MESSAGE'
     SEPERATOR = ':'
     @staticmethod
-    def generate(type):
-        return f"{type}{RadioHeaders.SEPERATOR}"
+    def generate(type,encode = False):
+        if not encode:
+            return f"{type}{RadioHeaders.SEPERATOR}"
+        else:
+            return f"{type}{RadioHeaders.SEPERATOR}".encode('utf-8')
 
 class RadioType:
     DRONE = 'DRONE'
