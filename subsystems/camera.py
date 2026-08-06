@@ -21,7 +21,7 @@ class Camera:
     pipeline : rs.pipeline
     align : rs.align
 
-    color_bytes : str = ""
+    color_bytes : bytes
 
     start_time = time.perf_counter()
 

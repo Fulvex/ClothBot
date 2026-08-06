@@ -131,20 +131,14 @@ socket.on('disconnect', function() {
 
 
 socket.on('video_frame', function(data) {
-  var uint8Arr = new Uint8Array(data.buffer);
+  var uint8Arr = new Uint8Array(data.image);
   var binary = '';
   for (var i = 0; i < uint8Arr.length; i++) {
       binary += String.fromCharCode(uint8Arr[i]);
   }
   var base64String = window.btoa(binary);
 
-  var img = new Image();
-  img.onload = function() {
-      var canvas = document.getElementById('videoStream');
-      var ctx = canvas.getContext('2d');
-      var x = 0, y = 0;
-      ctx.drawImage(this, x, y);
-  }
+  document.getElementById('videoStream').src = 'data:image/jpg;base64,' + base64String;
 });
 
 const tagDiv = document.getElementById("tag_data");
