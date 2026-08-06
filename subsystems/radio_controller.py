@@ -7,16 +7,19 @@ from subsystems.controller import Controller
 
 
 class RadioHeaders:
-    GAMEPAD = 'G'
-    CAMERA = 'C'
-    MESSAGE = 'M'
+    GAMEPAD = 'G:'
+    CAMERA = 'C:'
+    MESSAGE = 'M:'
+class RadioType:
+    DRONE = 'DRONE'
+    OPERATOR = 'OPERATOR'
 
 class RadioController:
     PORT = '/dev/radio'
     BAUD_RATE = 57600
     connected = False
     thread: threading.Thread
-    name = 'DRONE'
+    name = RadioType.DRONE
 
     FREQUENCY : float = 30
     DELAY : float = 1 / FREQUENCY
@@ -67,8 +70,19 @@ class RadioController:
     def _read_loop(self):
         while self.connected:
             data = self.serial.read()
-            if data:
-                print(data)
+            if (len(data) > 7):
+                try:
+                    header = data.split(':')[0]
+                    if (header == RadioHeaders.GAMEPAD):
+                        print(f"Received gamepad data: {data}")
+                    elif (header == RadioHeaders.CAMERA):
+                        print(f"Received camera data: {data}")
+                    elif (header == RadioHeaders.MESSAGE):
+                        print(f"Received message data: {data}")
+                except:
+                    header = None
+            if (data is not None):
+                print(f"Received: {data}")
             elapsed_time = time.perf_counter() - self.start_time
             if elapsed_time < RadioController.DELAY:
                 time.sleep(RadioController.DELAY - elapsed_time)
@@ -91,7 +105,7 @@ start_time = time.perf_counter()
 
 #python3 -m subsystems.radio_controller
 if __name__ == "__main__":
-    radio = RadioController('OPERATOR')
+    radio = RadioController(RadioType.OPERATOR)
     Controller.connect()
     time.sleep(1)
     try:

@@ -7,7 +7,7 @@ import numpy as np
 import pyrealsense2.pyrealsense2 as rs
 from flask_socketio import SocketIO
 from pupil_apriltags import Detector
-from subsystems.radio_controller import RadioController
+from subsystems.radio_controller import RadioController, RadioHeaders
 
 
 def meters_to_inches(meters):
@@ -179,7 +179,7 @@ class Camera:
                     if (socket is not None):
                         socket.emit("video_frame", {"image": Camera.color_b64})
                     if (radio is not None):
-                        radio.send(Camera.color_b64)
+                        radio.send(RadioHeaders.CAMERA + Camera.color_b64)
             except:
                 print("Camera Read Failed")
 
