@@ -24,7 +24,7 @@ class Arduino:
     connected = False
 
     @staticmethod
-    def connect_arduino(port='/dev/ttyACM0'):
+    def connect_arduino(port='/dev/arduino'):
         """Connects to the specified serial port (e.g. '/dev/ttyACM0' or 'COM12')."""
         Arduino.connected = False
 

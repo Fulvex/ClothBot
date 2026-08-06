@@ -70,10 +70,11 @@ SUBSYSTEM=="tty", ENV{ID_SERIAL_SHORT}=="12345", SYMLINK+="my_device_1"
 ARDUINO = 'arduino'
 ATTRS{idProduct}=="0042"
 ATTRS{idVendor}=="2341"
+ATTRS{idProduct}=="5489"
+ATTRS{idVendor}=="0bda"
 ATTRS{idProduct}=="0002"
 ATTRS{idVendor}=="1d6b"
-ATTRS{dbc_idProduct}=="0010"
-ATTRS{dbc_idVendor}=="1d6b"
+
 
 ROVER RADIO = 'radio'
 ATTRS{idProduct}=="6015"
