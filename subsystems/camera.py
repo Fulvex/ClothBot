@@ -172,15 +172,15 @@ class Camera:
                                 Camera.drive = 0
 
                     # 4. Encode the annotated frame to JPEG and base64
-                    _, buffer_color = cv2.imencode(".jpg", color_image, [cv2.IMWRITE_JPEG_QUALITY, 80])
+                    _, buffer_color = cv2.imencode(".jpg", color_image, [cv2.IMWRITE_JPEG_QUALITY, 70])
                     color_b64 = base64.b64encode(buffer_color).decode("utf-8")
                     Camera.color_b64 = color_b64
 
                     if (socket is not None):
                         socket.emit("video_frame", {"image": Camera.color_b64})
                     if (radio is not None):
-                        #radio.send(RadioHeaders.CAMERA + Camera.color_b64, print_out = False)
-                        pass
+                        _, buffer_color = cv2.imencode(".jpg", color_image, [cv2.IMWRITE_JPEG_QUALITY, 50])
+                        radio.send(RadioHeaders.generate(RadioHeaders.CAMERA) + buffer_color,encoded = True,print_out=False)
             except:
                 print("Camera Read Failed")
 

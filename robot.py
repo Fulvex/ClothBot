@@ -90,7 +90,7 @@ class Robot:
                 if (not Controller.connected):
                     if (isinstance(Robot.radio,RadioController)):
                         x,y,r = Robot.radio.x, Robot.radio.y, Robot.radio.r
-                        print("using radio")
+                        print("radio drive: ",x,y,r)
                     else:
                         x,y,r = 0,0,0
                 else:

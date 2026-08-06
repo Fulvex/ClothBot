@@ -2,7 +2,9 @@ import re
 import threading
 import time
 
+import cv2
 import serial
+
 
 from subsystems.controller import Controller
 
@@ -53,11 +55,11 @@ class RadioController:
             self.thread = threading.Thread(target=self._read_loop)
             self.thread.start()
 
-    def send(self, data, encrypted = False,print_out = True):
+    def send(self, data, encoded = False,print_out = True):
         if (not self.connected):
             return
         try:
-            if (not encrypted):
+            if (not encoded):
                 data = (data + "\n").encode('utf-8')
             self.serial.write(data)
             if print_out:
@@ -99,7 +101,9 @@ class RadioController:
                     self.r = float(values[2])
                     continue
                 elif (header == RadioHeaders.CAMERA and self.name == RadioType.OPERATOR):
-                    pass
+                    if (len(values) < 100):
+                        continue
+                    cv2.imshow("Camera", values)
                 else:
                     continue
                 print(f"Received {header}: {values}")
