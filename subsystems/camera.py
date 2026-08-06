@@ -180,6 +180,7 @@ class Camera:
                         socket.emit("video_frame", {"image": Camera.color_b64})
                     if (radio is not None):
                         _, buffer_color = cv2.imencode(".jpg", color_image, [cv2.IMWRITE_JPEG_QUALITY, 50])
+                        buffer_color = buffer_color.tobytes()
                         radio.send(RadioHeaders.generate(RadioHeaders.CAMERA,encode = True) + buffer_color,encoded = True,print_out=False)
             except:
                 print("Camera Read Failed")
