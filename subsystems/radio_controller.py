@@ -75,7 +75,7 @@ class RadioController:
                 lines = self.serial.read_all().decode('utf-8', errors='ignore').strip()
             except:
                 print(f"{self.name}: read failed")
-                return
+                continue
             lines = re.split(r'(\n)',lines)
             header = None
             values = None
@@ -92,6 +92,7 @@ class RadioController:
                     values = values.split(',')
                     if len(values) != 3:
                         continue
+                    print(values)
                     self.x = float(values[0])
                     self.y = float(values[1])
                     self.r = float(values[2])
