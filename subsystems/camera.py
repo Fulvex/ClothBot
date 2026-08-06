@@ -7,7 +7,7 @@ import numpy as np
 import pyrealsense2.pyrealsense2 as rs
 from flask_socketio import SocketIO
 from pupil_apriltags import Detector
-from radio_controller import RadioController
+from subsystems.radio_controller import RadioController
 
 
 def meters_to_inches(meters):
