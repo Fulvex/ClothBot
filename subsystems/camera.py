@@ -62,7 +62,7 @@ class Camera:
     frame_number = 0
 
     @staticmethod
-    def initiate(socket : SocketIO | None):
+    def initiate(socket : SocketIO):
         Camera.connected = False
         # --- Configure Intel RealSense Pipeline ---
         print("Connecting Camera")
@@ -92,7 +92,7 @@ class Camera:
             else:
                 print("Camera not connected")
     @staticmethod
-    def socket_thread(socket : SocketIO | None):
+    def socket_thread(socket : SocketIO):
         at_detector = Detector(families="tag36h11")
         while (Camera.connected and Camera.pipeline is not None and Camera.align is not None):
             elapsed = time.perf_counter() - Camera.start_time

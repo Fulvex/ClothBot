@@ -34,7 +34,7 @@ class Robot:
     thread : Thread
 
     @staticmethod
-    def initiate(socket : SocketIO | None):
+    def initiate(socket : SocketIO):
         Robot.controller_mode = ControllerState.DEFAULT
         Controller.connect()
         time.sleep(0.5)
