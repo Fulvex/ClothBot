@@ -179,7 +179,7 @@ class Camera:
                     if (socket is not None):
                         socket.emit("video_frame", {"image": Camera.color_b64})
                     if (radio is not None):
-                        radio.send(RadioHeaders.CAMERA + Camera.color_b64)
+                        radio.send(RadioHeaders.CAMERA + Camera.color_b64, print_out = False)
             except:
                 print("Camera Read Failed")
 

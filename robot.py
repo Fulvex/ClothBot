@@ -88,7 +88,10 @@ class Robot:
             if Robot.controller_mode == ControllerState.DIRECT:
                 Controller.run()
                 if (not Controller.connected):
-                    x,y,r = 0,0,0
+                    if (Robot.radio is not None):
+                        x,y,r = Robot.radio.x, Robot.radio.y, Robot.radio.r
+                    else:
+                        x,y,r = 0,0,0
                 else:
                     if Controller.controller.get_button(Controller.RIGHT_BUMPER) and not Controller.prev_rb:
                         if (Robot.state == RobotState.TELEOP):

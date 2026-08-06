@@ -11,9 +11,10 @@ class RadioHeaders:
     GAMEPAD = 'GAMEPAD'
     CAMERA = 'CAMERA'
     MESSAGE = 'MESSAGE'
+    SEPERATOR = ':'
     @staticmethod
     def generate(type):
-        return f"{type}:"
+        return f"{type}{RadioHeaders.SEPERATOR}"
 
 class RadioType:
     DRONE = 'DRONE'
@@ -30,6 +31,10 @@ class RadioController:
     DELAY : float = 1 / FREQUENCY
 
     start_time = time.perf_counter()
+
+    x = 0.0
+    y = 0.0
+    r = 0.0
 
     def __init__(self,name):
         self.name = name
@@ -48,14 +53,15 @@ class RadioController:
             self.thread = threading.Thread(target=self._read_loop)
             self.thread.start()
 
-    def send(self, data, encrypted = False):
+    def send(self, data, encrypted = False,print_out = True):
         if (not self.connected):
             return
         try:
             if (not encrypted):
                 data = (data + "\n").encode('utf-8')
             self.serial.write(data)
-            print(f"Sent: {data}")
+            if print_out:
+                print(f"Sent: {data}")
         except Exception as e:
             print(f"Failed to send data: {e}")
 
@@ -74,9 +80,18 @@ class RadioController:
             header = None
             values = None
             for line in (lines):
-                if line.startswith(RadioHeaders.GAMEPAD):
-                    header,values = line.split(RadioHeaders.GAMEPAD)
-                    break
+                header,values = line.split(RadioHeaders.SEPERATOR)
+                if (header is None or values is None):
+                    continue
+                if (header == RadioHeaders.GAMEPAD and self.name == RadioType.DRONE):
+                    values = values.split(',')
+                    self.x = float(values[0])
+                    self.y = float(values[1])
+                    self.r = float(values[2])
+                    continue
+                elif (header == RadioHeaders.CAMERA and self.name == RadioType.OPERATOR):
+                    pass
+                print(f"Received {header}: {values}")
             if (header is not None and values is not None):
                 print(f"Received {header}: {values}")
             elapsed_time = time.perf_counter() - self.start_time
@@ -92,33 +107,3 @@ class RadioController:
             self.thread.join()
             self.serial.close()
             print("Radio disconnected")
-
-
-SEND_FREQUENCY : float = 15
-SEND_DELAY : float = 1 / SEND_FREQUENCY
-
-start_time = time.perf_counter()
-
-#python3 -m subsystems.radio_controller
-if __name__ == "__main__":
-    radio = RadioController(RadioType.OPERATOR)
-    Controller.connect()
-    time.sleep(1)
-    try:
-        while True:
-            Controller.run()
-            if Controller.connected:
-                data = f'{RadioHeaders.generate(RadioHeaders.GAMEPAD)}{Controller.left_stick_x},{Controller.left_stick_y},{Controller.right_stick_x},{Controller.right_stick_y}'
-                radio.send(data)
-            else:
-                radio.send(f'{RadioHeaders.generate(RadioHeaders.GAMEPAD)}0,0,0,0')
-            elapsed_time = time.perf_counter() - start_time
-            if elapsed_time < SEND_DELAY:
-                time.sleep(SEND_DELAY - elapsed_time)
-            start_time = time.perf_counter()
-    except KeyboardInterrupt:
-        print("Exiting...")
-    finally:
-        if Controller.connected:
-            Controller.disconnect()
-        radio.close()
