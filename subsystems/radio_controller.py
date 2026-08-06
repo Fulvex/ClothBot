@@ -80,7 +80,10 @@ class RadioController:
             header = None
             values = None
             for line in (lines):
-                header,values = line.split(RadioHeaders.SEPERATOR)
+                try:
+                    header,values = line.split(RadioHeaders.SEPERATOR)
+                except:
+                    continue
                 if (header is None or values is None):
                     continue
                 if (header == RadioHeaders.GAMEPAD and self.name == RadioType.DRONE):
