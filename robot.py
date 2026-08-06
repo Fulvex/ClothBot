@@ -88,8 +88,9 @@ class Robot:
             if Robot.controller_mode == ControllerState.DIRECT:
                 Controller.run()
                 if (not Controller.connected):
-                    if (Robot.radio is not None):
+                    if (isinstance(Robot.radio,RadioController)):
                         x,y,r = Robot.radio.x, Robot.radio.y, Robot.radio.r
+                        print("using radio")
                     else:
                         x,y,r = 0,0,0
                 else:

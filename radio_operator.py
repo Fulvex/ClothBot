@@ -21,7 +21,7 @@ if __name__ == "__main__":
                 data = f'{RadioHeaders.generate(RadioHeaders.GAMEPAD)}{Controller.left_stick_x},{Controller.left_stick_y},{Controller.right_stick_x},{Controller.right_stick_y}'
                 radio.send(data)
             else:
-                radio.send(f'{RadioHeaders.generate(RadioHeaders.GAMEPAD)}0,0.2,0')
+                radio.send(f'{RadioHeaders.generate(RadioHeaders.GAMEPAD)}0,0.5,0')
             elapsed_time = time.perf_counter() - start_time
             if elapsed_time < SEND_DELAY:
                 time.sleep(SEND_DELAY - elapsed_time)

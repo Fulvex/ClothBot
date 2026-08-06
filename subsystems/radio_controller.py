@@ -92,7 +92,6 @@ class RadioController:
                     values = values.split(',')
                     if len(values) != 3:
                         continue
-                    print(values)
                     if (not all([v.replace('.', '', 1).isdigit() for v in values])):
                         continue
                     self.x = float(values[0])
