@@ -1,3 +1,4 @@
+import re
 import threading
 import time
 
@@ -7,9 +8,13 @@ from subsystems.controller import Controller
 
 
 class RadioHeaders:
-    GAMEPAD = 'G:'
-    CAMERA = 'C:'
-    MESSAGE = 'M:'
+    GAMEPAD = 'GAMEPAD'
+    CAMERA = 'CAMERA'
+    MESSAGE = 'MESSAGE'
+    @staticmethod
+    def generate(type):
+        return f"{type}:"
+
 class RadioType:
     DRONE = 'DRONE'
     OPERATOR = 'OPERATOR'
@@ -54,35 +59,26 @@ class RadioController:
         except Exception as e:
             print(f"Failed to send data: {e}")
 
-    def read(self,decoded = False):
-        if (not self.connected):
-            return
-        try:
-            raw_data = self.serial.readline()
-            if (not decoded):
-                raw_data = raw_data.decode('utf-8').strip()
-            print(f'Received: {raw_data}')
-            return raw_data
-        except Exception as e:
-            print(f"Failed to read data: {e}")
-            return None
 
     def _read_loop(self):
         while self.connected:
-            data = self.serial.read()
-            if (len(data) > 7):
-                try:
-                    header = data.split(':')[0]
-                    if (header == RadioHeaders.GAMEPAD):
-                        print(f"Received gamepad data: {data}")
-                    elif (header == RadioHeaders.CAMERA):
-                        print(f"Received camera data: {data}")
-                    elif (header == RadioHeaders.MESSAGE):
-                        print(f"Received message data: {data}")
-                except:
-                    header = None
-            if (data is not None):
-                print(f"Received: {data}")
+            if (not self.connected):
+                return
+            lines = ''
+            try:
+                lines = self.serial.read_all().decode('utf-8', errors='ignore').strip()
+            except:
+                print(f"{self.name}: read failed")
+                return
+            lines = re.split(r'(\n)',lines)
+            header = None
+            values = None
+            for line in (lines):
+                if line.startswith(RadioHeaders.GAMEPAD):
+                    header,values = line.split(RadioHeaders.GAMEPAD)
+                    break
+            if (header is not None and values is not None):
+                print(f"Received {header}: {values}")
             elapsed_time = time.perf_counter() - self.start_time
             if elapsed_time < RadioController.DELAY:
                 time.sleep(RadioController.DELAY - elapsed_time)
@@ -90,7 +86,7 @@ class RadioController:
 
 
     def close(self):
-        print("Closing radio...")
+        print(f"Closing {self.name} radio...")
         if self.connected:
             self.connected = False
             self.thread.join()
@@ -112,10 +108,10 @@ if __name__ == "__main__":
         while True:
             Controller.run()
             if Controller.connected:
-                data = f'{RadioHeaders.GAMEPAD}{Controller.left_stick_x},{Controller.left_stick_y},{Controller.right_stick_x},{Controller.right_stick_y}'
+                data = f'{RadioHeaders.generate(RadioHeaders.GAMEPAD)}{Controller.left_stick_x},{Controller.left_stick_y},{Controller.right_stick_x},{Controller.right_stick_y}'
                 radio.send(data)
             else:
-                radio.send(f'{RadioHeaders.GAMEPAD}0,0,0,0')
+                radio.send(f'{RadioHeaders.generate(RadioHeaders.GAMEPAD)}0,0,0,0')
             elapsed_time = time.perf_counter() - start_time
             if elapsed_time < SEND_DELAY:
                 time.sleep(SEND_DELAY - elapsed_time)
