@@ -28,7 +28,7 @@ class Camera:
     FRAME_RATE_HZ = 30
     FRAME_DELAY = 1.0 / FRAME_RATE_HZ
 
-    FRAMES_PER_TRANSMISSION = 3
+    FRAMES_PER_TRANSMISSION = 2
 
     thread : threading.Thread
 
@@ -174,13 +174,12 @@ class Camera:
                                 Camera.drive = 0
 
                     # 4. Encode the annotated frame to JPEG and base64
-                    _, buffer_color = cv2.imencode(".jpg", color_image, [cv2.IMWRITE_JPEG_QUALITY, 50])
+                    _, buffer_color = cv2.imencode(".jpg", color_image, [cv2.IMWRITE_JPEG_QUALITY, 30])
                     Camera.color_bytes = buffer_color.tobytes()
 
                     if (socket is not None):
                         Camera.frame_number +=1
                         if (Camera.frame_number > Camera.FRAMES_PER_TRANSMISSION):
-                            print("Sending frame")
                             socket.emit("video_frame", {"image": Camera.color_bytes})
                             Camera.frame_number = 0
             except:
