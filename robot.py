@@ -3,9 +3,8 @@ import time
 
 from flask_socketio import SocketIO
 from pygame.threads import Thread
-from subsystems.radio_controller import RadioController
 
-from subsystems.camera import Camera, ConnectionType
+from subsystems.camera import Camera
 from subsystems.controller import Controller
 from subsystems.drivetrain import Drivetrain
 from subsystems.hardware import Arduino
@@ -34,8 +33,6 @@ class Robot:
 
     thread : Thread
 
-    radio : RadioController | None
-
     @staticmethod
     def initiate(socket : SocketIO | None):
         Robot.controller_mode = ControllerState.DEFAULT
@@ -43,9 +40,8 @@ class Robot:
         time.sleep(0.5)
         if Controller.connected:
             Robot.controller_mode = ControllerState.DIRECT
-        Robot.radio = RadioController('DRONE')
         time.sleep(0.5)
-        Camera.initiate(socket,Robot.radio)
+        Camera.initiate(socket)
         time.sleep(0.5)
         Arduino.connect_arduino()
         time.sleep(1)
@@ -88,10 +84,7 @@ class Robot:
             if Robot.controller_mode == ControllerState.DIRECT:
                 Controller.run()
                 if (not Controller.connected):
-                    if (isinstance(Robot.radio,RadioController)):
-                        x,y,r = Robot.radio.x, Robot.radio.y, Robot.radio.r
-                    else:
-                        x,y,r = 0,0,0
+                    x,y,r = 0,0,0
                 else:
                     if Controller.controller.get_button(Controller.RIGHT_BUMPER) and not Controller.prev_rb:
                         if (Robot.state == RobotState.TELEOP):

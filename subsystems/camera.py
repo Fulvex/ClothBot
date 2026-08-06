@@ -1,4 +1,3 @@
-import base64
 import threading
 import time
 
@@ -7,7 +6,6 @@ import numpy as np
 import pyrealsense2.pyrealsense2 as rs
 from flask_socketio import SocketIO
 from pupil_apriltags import Detector
-from subsystems.radio_controller import RadioController, RadioHeaders
 
 
 def meters_to_inches(meters):
@@ -23,12 +21,14 @@ class Camera:
     pipeline : rs.pipeline
     align : rs.align
 
-    color_b64 : str = ""
+    color_bytes : str = ""
 
     start_time = time.perf_counter()
 
     FRAME_RATE_HZ = 30
     FRAME_DELAY = 1.0 / FRAME_RATE_HZ
+
+    FRAMES_PER_TRANSMISSION = 3
 
     thread : threading.Thread
 
@@ -59,8 +59,10 @@ class Camera:
 
     VISIBILITY_LOSS_DECAY = 0.75
 
+    frame_number = 0
+
     @staticmethod
-    def initiate(socket : SocketIO | None, radio : RadioController | None):
+    def initiate(socket : SocketIO | None):
         Camera.connected = False
         # --- Configure Intel RealSense Pipeline ---
         print("Connecting Camera")
@@ -84,13 +86,13 @@ class Camera:
             time.sleep(0.5)
             if (Camera.connected):
                 print("Threading started")
-                Camera.thread = threading.Thread(target=Camera.socket_thread,args=(socket,radio))
+                Camera.thread = threading.Thread(target=Camera.socket_thread,args=(socket))
                 Camera.thread.start()
                 Camera.start_time = time.perf_counter()
             else:
                 print("Camera not connected")
     @staticmethod
-    def socket_thread(socket : SocketIO | None, radio : RadioController | None):
+    def socket_thread(socket : SocketIO | None):
         at_detector = Detector(families="tag36h11")
         while (Camera.connected and Camera.pipeline is not None and Camera.align is not None):
             elapsed = time.perf_counter() - Camera.start_time
@@ -172,16 +174,14 @@ class Camera:
                                 Camera.drive = 0
 
                     # 4. Encode the annotated frame to JPEG and base64
-                    _, buffer_color = cv2.imencode(".jpg", color_image, [cv2.IMWRITE_JPEG_QUALITY, 70])
-                    color_b64 = base64.b64encode(buffer_color).decode("utf-8")
-                    Camera.color_b64 = color_b64
+                    _, buffer_color = cv2.imencode(".jpg", color_image, [cv2.IMWRITE_JPEG_QUALITY, 50])
+                    Camera.color_bytes = buffer_color
 
                     if (socket is not None):
-                        socket.emit("video_frame", {"image": Camera.color_b64})
-                    if (radio is not None):
-                        _, buffer_color = cv2.imencode(".jpg", color_image, [cv2.IMWRITE_JPEG_QUALITY, 50])
-                        buffer_color = buffer_color.tobytes()
-                        radio.send(RadioHeaders.generate(RadioHeaders.CAMERA,encode = True) + buffer_color,encoded = True,print_out=False)
+                        Camera.frame_number +=1
+                        if (Camera.frame_number > Camera.FRAMES_PER_TRANSMISSION):
+                            socket.emit("video_frame", {"image": Camera.color_bytes})
+                            Camera.frame_number = 0
             except:
                 print("Camera Read Failed")
 
