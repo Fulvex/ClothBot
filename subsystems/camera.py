@@ -7,10 +7,16 @@ import numpy as np
 import pyrealsense2.pyrealsense2 as rs
 from flask_socketio import SocketIO
 from pupil_apriltags import Detector
+from radio_controller import RadioController
 
 
 def meters_to_inches(meters):
     return meters * 39.3700787402
+
+class ConnectionType:
+    WIFI = "WIFI"
+    RADIO = "RADIO"
+
 
 class Camera:
     connected = False
@@ -49,10 +55,12 @@ class Camera:
     closest_distance : float = 10000
     tag_visible : bool = False
 
+    connection_type = ConnectionType.WIFI
+
     VISIBILITY_LOSS_DECAY = 0.75
 
     @staticmethod
-    def initiate(socket : SocketIO):
+    def initiate(socket : SocketIO | None, radio : RadioController | None):
         Camera.connected = False
         # --- Configure Intel RealSense Pipeline ---
         print("Connecting Camera")
@@ -76,13 +84,13 @@ class Camera:
             time.sleep(0.5)
             if (Camera.connected):
                 print("Threading started")
-                Camera.thread = threading.Thread(target=Camera.socket_thread,args=(socket,))
+                Camera.thread = threading.Thread(target=Camera.socket_thread,args=(socket,radio))
                 Camera.thread.start()
                 Camera.start_time = time.perf_counter()
             else:
                 print("Camera not connected")
     @staticmethod
-    def socket_thread(socket : SocketIO):
+    def socket_thread(socket : SocketIO | None, radio : RadioController | None):
         at_detector = Detector(families="tag36h11")
         while (Camera.connected and Camera.pipeline is not None and Camera.align is not None):
             elapsed = time.perf_counter() - Camera.start_time
@@ -170,6 +178,8 @@ class Camera:
 
                     if (socket is not None):
                         socket.emit("video_frame", {"image": Camera.color_b64})
+                    if (radio is not None):
+                        radio.send(Camera.color_b64)
             except:
                 print("Camera Read Failed")
 

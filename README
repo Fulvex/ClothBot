@@ -45,3 +45,51 @@ journalctl -u clothbot -f
 
 kill:
 pkill -f "app"
+
+
+
+
+
+
+
+
+
+---HOW TO MAKE PERMANENT PORTS!---
+1.
+sudo dmesg --follow | grep -i tty
+2. To read hardware info:
+#replace ttyUSB0 with your device name
+udevadm info --name=/dev/ttyUSB0 --attribute-walk | grep -E 'idVendor|idProduct'
+3. To set a permanent id:
+sudo nano /etc/udev/rules.d/99-usb-serial.rules
+#replace 0403 and 6001 with your device's vendor and product id and my_device with your desired symlink name
+SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", SYMLINK+="my_device"
+OR
+SUBSYSTEM=="tty", ENV{ID_SERIAL_SHORT}=="12345", SYMLINK+="my_device_1"
+
+ARDUINO = 'arduino'
+ATTRS{idProduct}=="0042"
+ATTRS{idVendor}=="2341"
+ATTRS{idProduct}=="0002"
+ATTRS{idVendor}=="1d6b"
+ATTRS{dbc_idProduct}=="0010"
+ATTRS{dbc_idVendor}=="1d6b"
+
+ROVER RADIO = 'radio'
+ATTRS{idProduct}=="6015"
+ATTRS{idVendor}=="0403"
+ATTRS{idProduct}=="0002"
+ATTRS{idVendor}=="1d6b"
+ATTRS{dbc_idProduct}=="0010"
+ATTRS{dbc_idVendor}=="1d6b"
+
+
+
+99-usb-serial.rules:
+SUBSYSTEM=="tty", ATTRS{idVendor}=="2341", ATTRS{idProduct}=="0042", SYMLINK+="arduino"
+SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6015", SYMLINK+="radio"
+
+4. Reload
+sudo udevadm control --reload-rules && sudo udevadm trigger
+5. Test
+ls -l /dev/my_device
