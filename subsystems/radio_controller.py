@@ -80,6 +80,8 @@ class RadioController:
             header = None
             values = None
             for line in (lines):
+                if len(line) < 8:
+                    continue
                 try:
                     header,values = line.split(RadioHeaders.SEPERATOR)
                 except:
@@ -88,14 +90,16 @@ class RadioController:
                     continue
                 if (header == RadioHeaders.GAMEPAD and self.name == RadioType.DRONE):
                     values = values.split(',')
+                    if len(values) != 3:
+                        continue
                     self.x = float(values[0])
                     self.y = float(values[1])
                     self.r = float(values[2])
                     continue
                 elif (header == RadioHeaders.CAMERA and self.name == RadioType.OPERATOR):
                     pass
-                print(f"Received {header}: {values}")
-            if (header is not None and values is not None):
+                else:
+                    continue
                 print(f"Received {header}: {values}")
             elapsed_time = time.perf_counter() - self.start_time
             if elapsed_time < RadioController.DELAY:
