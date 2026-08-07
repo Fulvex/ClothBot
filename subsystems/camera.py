@@ -11,11 +11,6 @@ from pupil_apriltags import Detector
 def meters_to_inches(meters):
     return meters * 39.3700787402
 
-class ConnectionType:
-    WIFI = "WIFI"
-    RADIO = "RADIO"
-
-
 class Camera:
     connected = False
     pipeline : rs.pipeline
@@ -54,8 +49,6 @@ class Camera:
     closest_id : int = -1
     closest_distance : float = 10000
     tag_visible : bool = False
-
-    connection_type = ConnectionType.WIFI
 
     VISIBILITY_LOSS_DECAY = 0.75
 
@@ -161,12 +154,12 @@ class Camera:
                             Camera.turn = Camera.TURN_P * ((center[0] - Camera.WIDTH // 2) / Camera.WIDTH)
                             perpendicular_distance = max(perpendicular_distance, Camera.MIN_DISTANCE)
                             Camera.drive = Camera.DRIVE_P * perpendicular_distance / Camera.MIN_DISTANCE
+                            if (tag.tag_id == 30):
+                                Camera.drive = -0.15 / Camera.drive
 
                             Camera.turn = max(-Camera.MAX_TURN, min(Camera.turn, Camera.MAX_TURN))
                             Camera.drive = max(-Camera.MAX_DRIVE, min(Camera.drive, Camera.MAX_DRIVE))
 
-                            if (tag.tag_id == 30):
-                                Camera.drive = -0.3 / Camera.drive
 
                             if abs(Camera.turn) < Camera.MIN_TURN:
                                 Camera.turn = 0
