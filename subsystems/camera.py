@@ -166,7 +166,7 @@ class Camera:
                             Camera.drive = max(-Camera.MAX_DRIVE, min(Camera.drive, Camera.MAX_DRIVE))
 
                             if (tag.tag_id == 30):
-                                Camera.drive = -1 / Camera.drive
+                                Camera.drive = -0.3 / Camera.drive
 
                             if abs(Camera.turn) < Camera.MIN_TURN:
                                 Camera.turn = 0
